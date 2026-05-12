@@ -1,0 +1,12 @@
+{
+  "name": "Sectrix",
+  "short_name": "Sectrix",
+  "description": "Enterprise Cybersecurity for the Gulf",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#060F22",
+  "theme_color": "#0E1F3A",
+  "icons": [
+    { "src": "/static/img/favicon.svg", "sizes": "any", "type": "image/svg+xml" }
+  ]
+}

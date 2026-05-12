@@ -1,0 +1,67 @@
+# Sectrix — local container stack.
+#   web : Django + Gunicorn behind WhiteNoise (static files)
+#   db  : PostgreSQL 16 with a healthcheck and named volume
+
+services:
+
+  db:
+    image: postgres:16-alpine
+    container_name: sectrix-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-sectrix}
+      POSTGRES_USER: ${POSTGRES_USER:-sectrix}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-sectrix_dev_password}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-sectrix} -d ${POSTGRES_DB:-sectrix}"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    ports:
+      - "127.0.0.1:5433:5432"   # host:container — exposed only on loopback
+
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: sectrix-web
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DJANGO_SECRET_KEY:        ${DJANGO_SECRET_KEY:-dev-change-me-for-prod-please-make-this-long-and-random}
+      DJANGO_DEBUG:             ${DJANGO_DEBUG:-False}
+      DJANGO_ALLOWED_HOSTS:     ${DJANGO_ALLOWED_HOSTS:-localhost,127.0.0.1,web}
+      DJANGO_CSRF_TRUSTED_ORIGINS: ${DJANGO_CSRF_TRUSTED_ORIGINS:-http://localhost:8001,http://127.0.0.1:8001}
+      DJANGO_TIME_ZONE:         ${DJANGO_TIME_ZONE:-Asia/Dubai}
+
+      DJANGO_DB_ENGINE:         postgres
+      POSTGRES_DB:              ${POSTGRES_DB:-sectrix}
+      POSTGRES_USER:            ${POSTGRES_USER:-sectrix}
+      POSTGRES_PASSWORD:        ${POSTGRES_PASSWORD:-sectrix_dev_password}
+      POSTGRES_HOST:            db
+      POSTGRES_PORT:            5432
+
+      DJANGO_EMAIL_BACKEND:     django.core.mail.backends.console.EmailBackend
+      DEFAULT_FROM_EMAIL:       noreply@sectrix.com
+      CONTACT_INBOX:            contact@sectrix.com
+
+      SECTRIX_SEED_DEMO:        ${SECTRIX_SEED_DEMO:-true}
+      SITE_URL:                 ${SITE_URL:-http://localhost:8001}
+    volumes:
+      - media:/app/media
+    ports:
+      - "8001:8000"   # host 8001 → container 8000 (host 8000 is owned by another stack)
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://localhost:8000/robots.txt >/dev/null || exit 1"]
+      interval: 10s
+      timeout: 3s
+      retries: 6
+      start_period: 20s
+
+volumes:
+  pgdata:
+  media:

@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<!-- ===================== HERO ===================== -->
+<section class="relative isolate overflow-hidden">
+  <div class="absolute inset-0 -z-10">
+    <div class="absolute inset-0 bg-grid-faint bg-grid-32 [mask-image:radial-gradient(ellipse_at_top,black_25%,transparent_70%)] opacity-50"></div>
+    <div class="absolute -top-32 left-1/3 w-[700px] h-[700px] rounded-full bg-accent/10 blur-3xl opacity-40"></div>
+  </div>
+
+  <div class="max-w-7xl mx-auto px-6 lg:px-8 pt-20 lg:pt-28 pb-16">
+    <div class="max-w-4xl" data-reveal>
+      <p class="text-xs font-semibold tracking-wider-3 text-accent uppercase mb-5">Services</p>
+      <h1 class="font-display text-4xl sm:text-5xl lg:text-6xl font-semibold leading-[1.06] tracking-tightest">
+        Six interlocking practices. One integrated security program.
+      </h1>
+      <p class="mt-7 text-lg lg:text-xl text-graphite-200 max-w-3xl leading-relaxed">
+        Every Sectrix service is designed to reinforce the others. Detection feeds response. Response sharpens
+        controls. Controls shape governance. Governance funds detection. The loop is deliberate.
+      </p>
+    </div>
+  </div>
+</section>
+
+
+<!-- ===================== INDEX NAV ===================== -->
+<nav class="sticky top-16 lg:top-20 z-30 border-y border-white/5 bg-navy-950/70 backdrop-blur-md">
+  <div class="max-w-7xl mx-auto px-6 lg:px-8">
+    <ul class="flex gap-1 overflow-x-auto py-3 text-sm scrollbar-thin">
+      {% for s in services %}
+        <li>
+          <a href="#{{ s.anchor }}" class="inline-flex items-center gap-2 px-3 py-2 rounded-md text-graphite-200 hover:text-white hover:bg-white/5 transition whitespace-nowrap">
+            <span class="font-mono text-xs text-accent">{{ s.tag }}</span> {{ s.title }}
+          </a>
+        </li>
+      {% endfor %}
+    </ul>
+  </div>
+</nav>
+
+
+<!-- ===================== SERVICE BLOCKS ===================== -->
+<section class="py-12 lg:py-20">
+  <div class="max-w-7xl mx-auto px-6 lg:px-8 space-y-20 lg:space-y-28">
+
+    {% for s in services %}
+      <article id="{{ s.anchor }}" class="scroll-mt-32 grid lg:grid-cols-12 gap-10" data-reveal>
+
+        <div class="lg:col-span-5">
+          <div class="flex items-baseline gap-4">
+            <span class="font-mono text-sm text-accent">{{ s.tag }}</span>
+            <div class="w-10 h-10 rounded-md border border-accent/30 bg-accent/10 text-accent flex items-center justify-center">{{ s.icon|safe }}</div>
+          </div>
+          <h2 class="mt-5 font-display text-3xl lg:text-4xl font-semibold tracking-tightest text-white">
+            {{ s.title }}
+          </h2>
+          <p class="mt-5 text-graphite-200 leading-relaxed">{{ s.intro }}</p>
+
+          <div class="mt-8 inline-flex items-center gap-3 px-4 py-2.5 rounded-md border border-accent/30 bg-accent/5">
+            <span class="text-xs font-mono tracking-wider-2 text-accent uppercase">Outcome</span>
+            <span class="text-sm text-white">{{ s.outcome }}</span>
+          </div>
+        </div>
+
+        <div class="lg:col-span-7">
+          <div class="p-8 rounded-2xl border border-white/10 bg-navy-900/40">
+            <p class="text-xs font-semibold tracking-wider-3 text-graphite-400 uppercase mb-5">Capabilities</p>
+            <ul class="grid sm:grid-cols-2 gap-y-3 gap-x-6">
+              {% for cap in s.capabilities %}
+                <li class="flex items-start gap-3 text-sm text-graphite-200">
+                  <svg viewBox="0 0 16 16" class="w-4 h-4 mt-0.5 text-accent shrink-0" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M3 8.5l3 3 7-8" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                  <span>{{ cap }}</span>
+                </li>
+              {% endfor %}
+            </ul>
+          </div>
+        </div>
+      </article>
+    {% endfor %}
+
+  </div>
+</section>
+
+
+{% include "partials/cta.html" %}
+
+{% endblock %}

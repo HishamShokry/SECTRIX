@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 360" width="1200" height="360" role="img" aria-label="Sectrix">
+  <title>Sectrix</title>
+  <desc>Sectrix combination mark. Four converging geometric blades form a precision X around a central electric-blue node, paired with a clean sans-serif wordmark.</desc>
+
+  <!-- White background -->
+  <rect width="1200" height="360" fill="#FFFFFF"/>
+
+  <!-- ============== ICON ============== -->
+  <!-- 200x200 icon, centered vertically against the wordmark cap-height -->
+  <g transform="translate(166, 80)">
+
+    <!-- Four converging blades: each blade is a tapered quadrilateral
+         pointing from an outer corner toward the protected center node.
+         Wide at the outer edge → narrow at the inner tip = precision /
+         secure-infrastructure feel. -->
+
+    <!-- Top-left blade -->
+    <polygon points="57,37 93,87 87,93 37,57"     fill="#0E1F3A"/>
+    <!-- Top-right blade -->
+    <polygon points="143,37 107,87 113,93 163,57" fill="#0E1F3A"/>
+    <!-- Bottom-left blade -->
+    <polygon points="57,163 93,113 87,107 37,143" fill="#0E1F3A"/>
+    <!-- Bottom-right blade -->
+    <polygon points="143,163 107,113 113,107 163,143" fill="#0E1F3A"/>
+
+    <!-- Central node — electric-blue diamond.
+         Reads as the protected core / secured endpoint at the X's heart. -->
+    <polygon points="100,92 108,100 100,108 92,100" fill="#00B4F0"/>
+
+  </g>
+
+  <!-- ============== WORDMARK ============== -->
+  <text x="416" y="218"
+        font-family="'Helvetica Neue', 'Inter', 'Arial', sans-serif"
+        font-size="118" font-weight="500"
+        fill="#0E1F3A" letter-spacing="16">SECTRIX</text>
+
+  <!-- Refined descriptor rule + label -->
+  <line x1="418" y1="250" x2="500" y2="250" stroke="#00B4F0" stroke-width="3"/>
+  <text x="514" y="257"
+        font-family="'Helvetica Neue', 'Inter', 'Arial', sans-serif"
+        font-size="18" font-weight="400"
+        fill="#4A5A75" letter-spacing="6">CYBERSECURITY</text>
+
+</svg>

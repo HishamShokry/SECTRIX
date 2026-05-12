@@ -1,0 +1,80 @@
+{% load static %}
+<header
+  x-data="{ open: false, scrolled: false }"
+  x-init="scrolled = window.scrollY > 8; window.addEventListener('scroll', () => scrolled = window.scrollY > 8)"
+  :class="scrolled ? 'bg-navy-950/85 backdrop-blur-md border-white/10' : 'bg-transparent border-transparent'"
+  class="sticky top-0 z-40 w-full border-b transition-colors duration-300">
+
+  <nav class="max-w-7xl mx-auto px-6 lg:px-8 h-16 lg:h-20 flex items-center justify-between">
+
+    <!-- Logo -->
+    <a href="{% url 'core:home' %}" class="flex items-center gap-3 group" aria-label="Sectrix home">
+      {% include "partials/logo.html" with size=28 %}
+      <span class="font-display font-semibold tracking-wider-2 text-white text-base lg:text-lg">SECTRIX</span>
+    </a>
+
+    <!-- Desktop nav -->
+    <ul class="hidden lg:flex items-center gap-8">
+      {% for item in nav_items %}
+        <li>
+          {% with active=request.resolver_match.view_name|default:"" %}
+          <a href="{% url item.url_name %}"
+             class="text-sm font-medium tracking-wide transition relative
+                    {% if active == item.url_name %}text-white after:absolute after:left-0 after:-bottom-2 after:h-px after:w-full after:bg-accent{% else %}text-graphite-200 hover:text-white{% endif %}">
+            {{ item.label }}
+          </a>
+          {% endwith %}
+        </li>
+      {% endfor %}
+    </ul>
+
+    <!-- Desktop CTA -->
+    <div class="hidden lg:flex items-center gap-3">
+      <a href="{% url 'contact:contact' %}"
+         class="inline-flex items-center gap-2 text-sm font-medium px-4 py-2.5 rounded-md
+                bg-accent text-navy-950 hover:bg-accent-soft transition shadow-glow-accent">
+        Request a Briefing
+        <svg viewBox="0 0 20 20" class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M4 10h12M12 6l4 4-4 4" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </a>
+    </div>
+
+    <!-- Mobile toggle -->
+    <button @click="open = !open" type="button"
+            class="lg:hidden text-white p-2 -mr-2" :aria-expanded="open" aria-label="Toggle menu">
+      <svg x-show="!open" class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5M3.75 17.25h16.5"/>
+      </svg>
+      <svg x-show="open" x-cloak class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+      </svg>
+    </button>
+  </nav>
+
+  <!-- Mobile menu -->
+  <div x-show="open" x-cloak
+       x-transition:enter="transition ease-out duration-200"
+       x-transition:enter-start="opacity-0 -translate-y-2"
+       x-transition:enter-end="opacity-100 translate-y-0"
+       class="lg:hidden border-t border-white/10 bg-navy-950/95 backdrop-blur-md">
+    <ul class="px-6 py-4 space-y-1">
+      {% for item in nav_items %}
+        <li>
+          <a href="{% url item.url_name %}"
+             class="block px-3 py-3 rounded-md text-base font-medium text-graphite-100 hover:text-white hover:bg-white/5 transition">
+            {{ item.label }}
+          </a>
+        </li>
+      {% endfor %}
+      <li class="pt-2">
+        <a href="{% url 'contact:contact' %}"
+           class="block w-full text-center px-4 py-3 rounded-md bg-accent text-navy-950 font-medium">
+          Request a Briefing
+        </a>
+      </li>
+    </ul>
+  </div>
+
+  <style>[x-cloak] { display: none !important; }</style>
+</header>

@@ -1,0 +1,27 @@
+<section class="relative py-24 lg:py-32 overflow-hidden">
+  <div class="absolute inset-0 bg-grid-faint bg-grid-32 [mask-image:radial-gradient(ellipse_at_center,black_30%,transparent_70%)] opacity-50"></div>
+  <div class="absolute inset-0 bg-radial-fade"></div>
+
+  <div class="relative max-w-5xl mx-auto px-6 text-center" data-reveal>
+    <p class="text-xs font-semibold tracking-wider-3 text-accent uppercase mb-5">Engage Sectrix</p>
+    <h2 class="font-display text-3xl sm:text-4xl lg:text-5xl font-semibold tracking-tightest text-white">
+      Defense, engineered to the threat model<br class="hidden md:block">
+      your organization actually faces.
+    </h2>
+    <p class="mt-6 text-lg text-graphite-200 max-w-2xl mx-auto">
+      Request a confidential briefing with our principals. We&rsquo;ll review your current posture,
+      benchmark it against peers in your sector, and outline a 90-day roadmap.
+    </p>
+    <div class="mt-10 flex flex-col sm:flex-row gap-4 justify-center">
+      <a href="{% url 'contact:contact' %}"
+         class="inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-md bg-accent text-navy-950 font-semibold hover:bg-accent-soft transition shadow-glow-accent">
+        Request a Briefing
+        <svg viewBox="0 0 20 20" class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 10h12M12 6l4 4-4 4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </a>
+      <a href="{% url 'services:list' %}"
+         class="inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-md border border-white/15 text-white font-semibold hover:border-white/40 hover:bg-white/5 transition">
+        Explore Services
+      </a>
+    </div>
+  </div>
+</section>

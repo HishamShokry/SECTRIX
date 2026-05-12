@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 360" width="1200" height="360" role="img" aria-label="Sectrix monochrome">
+  <title>Sectrix — monochrome (print / single-color use)</title>
+
+  <rect width="1200" height="360" fill="#FFFFFF"/>
+
+  <g transform="translate(166, 80)">
+
+    <!-- All four blades + center node in a single ink for foil / emboss / single-plate print -->
+    <polygon points="57,37 93,87 87,93 37,57"       fill="#0E1F3A"/>
+    <polygon points="143,37 107,87 113,93 163,57"   fill="#0E1F3A"/>
+    <polygon points="57,163 93,113 87,107 37,143"   fill="#0E1F3A"/>
+    <polygon points="143,163 107,113 113,107 163,143" fill="#0E1F3A"/>
+    <polygon points="100,92 108,100 100,108 92,100" fill="#0E1F3A"/>
+
+  </g>
+
+  <text x="416" y="218"
+        font-family="'Helvetica Neue', 'Inter', 'Arial', sans-serif"
+        font-size="118" font-weight="500"
+        fill="#0E1F3A" letter-spacing="16">SECTRIX</text>
+</svg>

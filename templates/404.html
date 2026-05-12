@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+
+{% block title %}404 — Page not found · Sectrix{% endblock %}
+
+{% block content %}
+<section class="min-h-[70vh] flex items-center justify-center px-6">
+  <div class="text-center max-w-xl">
+    <p class="text-xs font-semibold tracking-wider-3 text-accent uppercase mb-4">Error 404</p>
+    <h1 class="font-display text-5xl sm:text-6xl font-semibold tracking-tightest text-white">Path not found.</h1>
+    <p class="mt-5 text-graphite-200">
+      The resource you requested isn&rsquo;t available on this perimeter. Return to the secured surface area below.
+    </p>
+    <div class="mt-8">
+      <a href="{% url 'core:home' %}" class="inline-flex items-center gap-2 px-5 py-3 rounded-md bg-accent text-navy-950 font-semibold hover:bg-accent-soft transition">
+        Back to home
+      </a>
+    </div>
+  </div>
+</section>
+{% endblock %}
