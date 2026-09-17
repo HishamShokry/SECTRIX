@@ -1,4 +1,4 @@
-"""Django settings for Sectrix corporate website."""
+"""Django settings for Sectrex corporate website."""
 from pathlib import Path
 import os
 
@@ -153,8 +153,8 @@ EMAIL_PORT = int(env("EMAIL_PORT", "587"))
 EMAIL_HOST_USER = env("EMAIL_HOST_USER", "")
 EMAIL_HOST_PASSWORD = env("EMAIL_HOST_PASSWORD", "")
 EMAIL_USE_TLS = env_bool("EMAIL_USE_TLS", True)
-DEFAULT_FROM_EMAIL = env("DEFAULT_FROM_EMAIL", "noreply@sectrix.com")
-CONTACT_INBOX = env("CONTACT_INBOX", "contact@sectrix.com")
+DEFAULT_FROM_EMAIL = env("DEFAULT_FROM_EMAIL", "noreply@sectrexconsulting.com")
+CONTACT_INBOX = env("CONTACT_INBOX", "contact@sectrexconsulting.com")
 
 
 # --- Security (production toggles) ---------------------------------------
@@ -180,17 +180,17 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 ALLOW_INDEXING = env_bool("DJANGO_ALLOW_INDEXING", False)
 
 SITE_META = {
-    "name": "Sectrix",
+    "name": "Sectrex Consulting",
     "tagline": "Enterprise Cybersecurity for the Modern Threat Landscape",
     "description": (
-        "Sectrix delivers enterprise-grade cybersecurity for banks, governments, "
+        "Sectrex delivers enterprise-grade cybersecurity for banks, governments, "
         "and large organizations across the Gulf — threat detection, cloud "
         "security, incident response, and zero trust architecture."
     ),
     "keywords": "cybersecurity, threat detection, zero trust, incident response, cloud security, Gulf, enterprise",
-    "url": env("SITE_URL", "https://sectrix.com"),
-    "twitter": "@sectrix",
-    "email": "contact@sectrix.com",
+    "url": env("SITE_URL", "https://sectrexconsulting.com"),
+    "twitter": "@sectrex",
+    "email": "contact@sectrexconsulting.com",
     "phone": "+971 4 000 0000",
     "address": "Dubai Internet City · Dubai · United Arab Emirates",
 }

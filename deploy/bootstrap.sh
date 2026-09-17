@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
-# Sectrix — one-shot host bootstrap (Ubuntu 24.04, bare metal or VPS).
+# Sectrex — one-shot host bootstrap (Ubuntu 24.04, bare metal or VPS).
 #
 # Prepares a FRESH, DEDICATED host to run the docker-compose stack:
 #   swap -> docker -> firewall -> nginx -> certbot
 #
 # Usage (as root on the target host):
-#   DOMAIN=sectrix.com EMAIL=ops@sectrix.com ./deploy/bootstrap.sh
+#   DOMAIN=sectrexconsulting.com EMAIL=ops@sectrexconsulting.com ./deploy/bootstrap.sh
 #
 # Idempotent: safe to re-run.
 #

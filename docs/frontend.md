@@ -134,7 +134,7 @@ If you need a one-off icon in a single template, just inline it directly in HTML
 
 The four blade polygons paint via `fill="currentColor"`, so the surrounding element's text color drives the logo color. The center accent diamond is hard-coded to `#00B4F0` so the brand accent persists across both light and dark contexts.
 
-The full lockup logos (with the SECTRIX wordmark) live under `static/img/`:
+The full lockup logos (with the SECTREX wordmark) live under `static/img/`:
 
 - `logo.svg` — primary on light background
 - `logo-dark.svg` — primary on dark background

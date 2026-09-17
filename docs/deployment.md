@@ -30,8 +30,8 @@ Point DNS at the server before running the bootstrap — certbot's HTTP-01
 challenge needs the name to resolve.
 
 ```
-A    sectrix.com       -> <server-ip>
-A    www.sectrix.com   -> <server-ip>
+A    sectrexconsulting.com       -> <server-ip>
+A    www.sectrexconsulting.com   -> <server-ip>
 ```
 
 ## 2. Bootstrap the host
@@ -40,7 +40,7 @@ A    www.sectrix.com   -> <server-ip>
 ssh root@<server-ip>
 git clone <repo-url> /opt/sectrix
 cd /opt/sectrix
-DOMAIN=sectrix.com EMAIL=ops@sectrix.com ./deploy/bootstrap.sh
+DOMAIN=sectrexconsulting.com EMAIL=ops@sectrexconsulting.com ./deploy/bootstrap.sh
 ```
 
 `deploy/bootstrap.sh` is idempotent and does: fresh-host preflight, a swapfile

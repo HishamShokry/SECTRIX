@@ -17,9 +17,9 @@ class ContactView(FormView):
 
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
-        ctx["meta_title"] = "Contact · Sectrix"
+        ctx["meta_title"] = "Contact · Sectrex"
         ctx["meta_description"] = (
-            "Speak with Sectrix about an engagement, an active incident, or a "
+            "Speak with Sectrex about an engagement, an active incident, or a "
             "strategic security assessment for your organization."
         )
         ctx["offices"] = [
@@ -28,7 +28,7 @@ class ContactView(FormView):
                 "country": "United Arab Emirates",
                 "address": "Dubai Internet City · Building 14 · Dubai, UAE",
                 "phone": "+971 4 000 0000",
-                "email": "dubai@sectrix.com",
+                "email": "dubai@sectrexconsulting.com",
                 "is_headquarters": True,
             },
             {
@@ -36,7 +36,7 @@ class ContactView(FormView):
                 "country": "Saudi Arabia",
                 "address": "King Abdullah Financial District · Riyadh, KSA",
                 "phone": "+966 11 000 0000",
-                "email": "riyadh@sectrix.com",
+                "email": "riyadh@sectrexconsulting.com",
                 "is_headquarters": False,
             },
             {
@@ -44,7 +44,7 @@ class ContactView(FormView):
                 "country": "Qatar",
                 "address": "West Bay · Doha, Qatar",
                 "phone": "+974 4000 0000",
-                "email": "doha@sectrix.com",
+                "email": "doha@sectrexconsulting.com",
                 "is_headquarters": False,
             },
         ]
@@ -61,7 +61,7 @@ class ContactView(FormView):
         # Notify inbox; backend defaults to console in dev (see settings).
         try:
             send_mail(
-                subject=f"[Sectrix] New inquiry — {inquiry.company} ({inquiry.get_interest_display()})",
+                subject=f"[Sectrex] New inquiry — {inquiry.company} ({inquiry.get_interest_display()})",
                 message=(
                     f"From: {inquiry.full_name} <{inquiry.work_email}>\n"
                     f"Company: {inquiry.company}\n"
@@ -79,12 +79,12 @@ class ContactView(FormView):
         except Exception:
             pass
 
-        messages.success(self.request, "Thank you — a Sectrix specialist will reach out within one business day.")
+        messages.success(self.request, "Thank you — a Sectrex specialist will reach out within one business day.")
         return super().form_valid(form)
 
 
 def thanks(request):
     return render(request, "contact/thanks.html", {
-        "meta_title": "Thank you · Sectrix",
+        "meta_title": "Thank you · Sectrex",
         "meta_description": "Your inquiry has been received.",
     })

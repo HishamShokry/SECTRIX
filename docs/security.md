@@ -114,7 +114,7 @@ Three places are anonymously POSTable / GETable and unrated:
 
 ### No 2FA on admin
 
-`django-otp` + `django-two-factor-auth` is the standard Django stack. Add before the admin is reachable on the public internet. Sectrix's threat model — Gulf banks and sovereign agencies as clients — makes a compromised admin a credible threat vector.
+`django-otp` + `django-two-factor-auth` is the standard Django stack. Add before the admin is reachable on the public internet. Sectrex's threat model — Gulf banks and sovereign agencies as clients — makes a compromised admin a credible threat vector.
 
 ### Contact-form email sent synchronously
 
@@ -156,4 +156,4 @@ There is no separate audit table for admin actions. If you need one, enable `dja
 
 ## Responsible disclosure
 
-The footer links to a `/responsible-disclosure` page; that URL is a placeholder and not implemented. For a real launch, either ship a `security.txt` at `/.well-known/security.txt` or stand up a real disclosure page. The `disclose@sectrix.com` mailbox referenced there does not yet exist — make sure it does before publishing the link.
+The footer links to a `/responsible-disclosure` page; that URL is a placeholder and not implemented. For a real launch, either ship a `security.txt` at `/.well-known/security.txt` or stand up a real disclosure page. The `disclose@sectrexconsulting.com` mailbox referenced there does not yet exist — make sure it does before publishing the link.

@@ -1,4 +1,4 @@
-"""WSGI config for Sectrix."""
+"""WSGI config for Sectrex."""
 import os
 from django.core.wsgi import get_wsgi_application
 

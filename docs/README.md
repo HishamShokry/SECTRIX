@@ -1,6 +1,6 @@
-# Sectrix — Technical Documentation
+# Sectrex — Technical Documentation
 
-Technical reference for engineers extending, operating, or auditing the Sectrix corporate website.
+Technical reference for engineers extending, operating, or auditing the Sectrex corporate website.
 
 The top-level [`README.md`](../README.md) is the install/quickstart guide. The documents in this directory go deeper: why the system is shaped the way it is, where to make changes, and what guarantees the runtime gives you.
 

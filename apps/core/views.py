@@ -22,9 +22,9 @@ class HomeView(TemplateView):
         ctx["stats"] = content.HOME_STATS
         ctx["features"] = content.HOME_FEATURES
 
-        ctx["meta_title"] = "Sectrix · Enterprise Cybersecurity"
+        ctx["meta_title"] = "Sectrex · Enterprise Cybersecurity"
         ctx["meta_description"] = (
-            "Sectrix delivers enterprise-grade cybersecurity for Gulf banks, "
+            "Sectrex delivers enterprise-grade cybersecurity for Gulf banks, "
             "governments, and large organizations. Threat detection, cloud "
             "security, zero trust, and incident response."
         )
@@ -41,9 +41,9 @@ class AboutView(TemplateView):
         ctx["leadership"] = content.LEADERSHIP
         ctx["timeline"] = content.TIMELINE
 
-        ctx["meta_title"] = "About · Sectrix"
+        ctx["meta_title"] = "About · Sectrex"
         ctx["meta_description"] = (
-            "Sectrix is an enterprise cybersecurity partner founded on the "
+            "Sectrex is an enterprise cybersecurity partner founded on the "
             "principle that defense must be engineered with the same rigor as "
             "the systems it protects."
         )

@@ -15,9 +15,9 @@ class CareersView(ListView):
 
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
-        ctx["meta_title"] = "Careers · Sectrix"
+        ctx["meta_title"] = "Careers · Sectrex"
         ctx["meta_description"] = (
-            "Join Sectrix — build the next generation of cybersecurity "
+            "Join Sectrex — build the next generation of cybersecurity "
             "defense for Gulf enterprises. Open roles across SOC, threat "
             "intelligence, cloud security, and offensive security."
         )

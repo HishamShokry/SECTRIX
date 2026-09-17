@@ -1,5 +1,5 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 360" width="1200" height="360" role="img" aria-label="Sectrix">
-  <title>Sectrix — dark background</title>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 360" width="1200" height="360" role="img" aria-label="Sectrex">
+  <title>Sectrex — dark background</title>
 
   <!-- Deep navy canvas -->
   <rect width="1200" height="360" fill="#0E1F3A"/>
@@ -20,7 +20,7 @@
   <text x="416" y="218"
         font-family="'Helvetica Neue', 'Inter', 'Arial', sans-serif"
         font-size="118" font-weight="500"
-        fill="#FFFFFF" letter-spacing="16">SECTRIX</text>
+        fill="#FFFFFF" letter-spacing="16">SECTREX</text>
 
   <line x1="418" y1="250" x2="500" y2="250" stroke="#00B4F0" stroke-width="3"/>
   <text x="514" y="257"

@@ -1,4 +1,4 @@
-"""Sectrix root URL configuration."""
+"""Sectrex root URL configuration."""
 from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib import admin
@@ -33,6 +33,6 @@ if settings.DEBUG:
 handler404 = "apps.core.views.handler404"
 handler500 = "apps.core.views.handler500"
 
-admin.site.site_header = "Sectrix Administration"
-admin.site.site_title = "Sectrix Admin"
+admin.site.site_header = "Sectrex Administration"
+admin.site.site_title = "Sectrex Admin"
 admin.site.index_title = "Operations Console"

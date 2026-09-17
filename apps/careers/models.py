@@ -42,7 +42,7 @@ class JobOpening(models.Model):
     is_published = models.BooleanField(default=True)
     posted_at = models.DateField(auto_now_add=True)
     closes_at = models.DateField(null=True, blank=True)
-    apply_email = models.EmailField(default="careers@sectrix.com")
+    apply_email = models.EmailField(default="careers@sectrexconsulting.com")
 
     class Meta:
         ordering = ["-posted_at", "title"]

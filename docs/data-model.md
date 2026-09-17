@@ -90,7 +90,7 @@ is_published, posted_at (auto), closes_at, apply_email
 
 `posted_at` is `auto_now_add=True` — set once on creation. `closes_at` is optional and currently unused by the list view (add a filter when needed).
 
-Applications today go through `mailto:` directly to `apply_email` (default `careers@sectrix.com`). If you need a proper applications model, add `JobApplication` here with an FK to `JobOpening`.
+Applications today go through `mailto:` directly to `apply_email` (default `careers@sectrexconsulting.com`). If you need a proper applications model, add `JobApplication` here with an FK to `JobOpening`.
 
 ---
 
