@@ -86,7 +86,12 @@ services:
       # host firewall, bypassing nginx, TLS and the rate limits.
       - "127.0.0.1:8001:8000"   # host 8001 → container 8000
     healthcheck:
-      test: ["CMD-SHELL", "curl -fsS http://localhost:8000/robots.txt >/dev/null || exit 1"]
+      # Sends the first configured ALLOWED_HOSTS entry as the Host header:
+      # requesting "localhost" trips Django's host validation (400) on any
+      # deployment whose ALLOWED_HOSTS is the real domain, which marked a
+      # perfectly healthy container unhealthy. X-Forwarded-Proto avoids the
+      # HTTPS redirect so this asserts a real 200.
+      test: ["CMD-SHELL", "curl -fsS -H \"Host: $${DJANGO_ALLOWED_HOSTS%%,*}\" -H 'X-Forwarded-Proto: https' http://127.0.0.1:8000/robots.txt >/dev/null || exit 1"]
       interval: 10s
       timeout: 3s
       retries: 6
