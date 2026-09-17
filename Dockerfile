@@ -13,14 +13,15 @@ RUN npm ci --no-audit --no-fund
 
 # Only what Tailwind scans for class names, so edits elsewhere reuse the layer.
 COPY tailwind.config.js ./
+COPY scripts ./scripts
 COPY static/src ./static/src
 COPY templates ./templates
 COPY apps ./apps
 
-# Copy Alpine and the variable fonts out of node_modules, then compile the CSS
-# (which carries the @font-face rules pointing at those files).
-RUN npm run vendor \
- && npx tailwindcss -i ./static/src/input.css -o ./static/css/tailwind.css --minify
+# `npm run build` = vendor (Alpine + fonts out of node_modules) -> compile the
+# CSS -> strip library version strings from both. Calling the tailwind binary
+# directly here would skip that last step and ship the versions to production.
+RUN npm run build
 
 
 # ---- Base ----------------------------------------------------------------

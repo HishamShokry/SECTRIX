@@ -219,3 +219,39 @@ class PrivacyNoticeTests(TestCase):
     def test_footer_links_to_it(self):
         body = self.client.get(reverse("core:home")).content.decode()
         self.assertIn(reverse("core:privacy"), body)
+
+
+class AssetFingerprintTests(TestCase):
+    """Served assets must not advertise library versions.
+
+    Scanners read these straight out of the files and turn "uses Alpine" into
+    "uses an Alpine with CVE-XXXX". Stripping them is fingerprint reduction,
+    not a fix -- patching is what protects the site -- but it removes the
+    free lookup.
+    """
+
+    ASSETS = ("static/css/tailwind.css", "static/js/alpine.min.js")
+
+    def test_no_version_strings_in_built_assets(self):
+        import re
+        from pathlib import Path
+
+        pattern = re.compile(r"(tailwindcss v\d+\.\d+\.\d+|version:\"\d+\.\d+\.\d+\")")
+        for asset in self.ASSETS:
+            path = Path(settings.BASE_DIR, asset)
+            if not path.exists():
+                self.skipTest(f"{asset} not built; run npm run build")
+            found = pattern.findall(path.read_text(errors="replace"))
+            with self.subTest(asset=asset):
+                self.assertEqual(found, [], f"{asset} leaks a version: {found}")
+
+    def test_attribution_is_preserved(self):
+        """Stripping the version must not strip the MIT notice with it."""
+        from pathlib import Path
+
+        css = Path(settings.BASE_DIR, "static/css/tailwind.css")
+        if not css.exists():
+            self.skipTest("tailwind.css not built")
+        content = css.read_text(errors="replace")
+        self.assertIn("MIT License", content)
+        self.assertIn("tailwindcss", content)
