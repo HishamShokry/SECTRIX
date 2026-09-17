@@ -1,6 +1,6 @@
 from django.conf import settings
 
-from .models import SiteSettings
+from .models import SiteSettings, SocialLink
 
 
 def site_meta(request):
@@ -9,6 +9,7 @@ def site_meta(request):
         # is not migrated yet (e.g. during the first deploy).
         "site": _site(),
         "allow_indexing": getattr(settings, "ALLOW_INDEXING", False),
+        "social": _social_links(),
         "nav_items": [
             {"label": "Home", "url_name": "core:home"},
             {"label": "About", "url_name": "core:about"},
@@ -18,6 +19,14 @@ def site_meta(request):
             {"label": "Contact", "url_name": "contact:contact"},
         ],
     }
+
+
+def _social_links():
+    """Footer social links; empty rather than fatal if the table is missing."""
+    try:
+        return list(SocialLink.objects.live())
+    except Exception:
+        return []
 
 
 def _site():

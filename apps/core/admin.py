@@ -9,6 +9,7 @@ from .models import (
     HomeStat,
     LeadershipMember,
     SiteSettings,
+    SocialLink,
     TimelineEntry,
     TrustedByLogo,
 )
@@ -57,6 +58,12 @@ class SiteSettingsAdmin(admin.ModelAdmin):
 
     def has_delete_permission(self, request, obj=None):
         return False
+
+
+@admin.register(SocialLink)
+class SocialLinkAdmin(ContentAdmin):
+    list_display = ("name", "icon_key", "url", "display_order", "is_published")
+    list_filter = ("is_published", "icon_key")
 
 
 @admin.register(TrustedByLogo)

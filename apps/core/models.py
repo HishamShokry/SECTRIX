@@ -14,7 +14,12 @@ at without knowing the model names.
 from django.core.cache import cache
 from django.db import models
 
-from apps.core.icons import ICON_CHOICES, render_icon
+from apps.core.icons import (
+    ICON_CHOICES,
+    SOCIAL_ICON_CHOICES,
+    render_icon,
+    render_social_icon,
+)
 
 
 class PublishedOrderedQuerySet(models.QuerySet):
@@ -227,6 +232,36 @@ class TimelineEntry(ContentBase):
 
     def __str__(self) -> str:
         return f"{self.year} — {self.title}"
+
+
+class SocialLink(ContentBase):
+    """A social profile link in the footer.
+
+    Replaces a hardcoded block, and deliberately does not store markup: the
+    icon is chosen by key from a fixed registry, so an editor cannot inject
+    HTML into the footer of every page. This is the pattern the earlier
+    `{{ net.icon|safe }}` loop got wrong.
+    """
+
+    name = models.CharField(max_length=60, help_text="Used as the link's accessible label.")
+    url = models.URLField(help_text="Full profile URL, e.g. https://www.linkedin.com/company/…")
+    icon_key = models.CharField(
+        max_length=40,
+        choices=SOCIAL_ICON_CHOICES,
+        help_text="Brand mark to display.",
+    )
+
+    class Meta(ContentBase.Meta):
+        verbose_name = "Footer · Social Link"
+        verbose_name_plural = "Footer · Social Links"
+
+    def __str__(self) -> str:
+        return self.name
+
+    @property
+    def icon(self) -> str:
+        """Inline SVG from the registry — never editor-supplied markup."""
+        return render_social_icon(self.icon_key)
 
 
 class CulturePillar(ContentBase):

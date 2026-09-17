@@ -184,18 +184,68 @@ class DeploymentCheckTests(TestCase):
 
 
 class DeadSinkTests(TestCase):
-    """L1: an undefined loop variable rendered through |safe site-wide."""
+    """L1: an undefined loop variable rendered through |safe site-wide.
+
+    The social links are back, but as SocialLink records whose `icon` property
+    returns a SafeString from a fixed registry. The property is what makes the
+    markup safe, so the assertion is on the filter, not on the feature.
+    """
 
     def test_footer_has_no_unescaped_sink(self):
         import re
         from pathlib import Path
 
         footer = Path(settings.BASE_DIR, "templates/partials/footer.html").read_text()
-        # Strip {# ... #} comments first: the removal is documented inline and
-        # that note legitimately mentions the filter it replaced.
+        # Strip {# ... #} comments: the inline note legitimately names the
+        # filter it replaced.
         active = re.sub(r"\{#.*?#\}", "", footer, flags=re.S)
         self.assertNotIn("|safe", active, "footer must not render unescaped HTML")
-        self.assertNotIn("{% for net in social %}", active)
+
+    def test_no_multiline_hash_comments(self):
+        """Django's {# #} is single-line; a multi-line one renders verbatim.
+
+        This shipped a developer note about XSS into the page source of every
+        request, which is both noise and an unnecessary hint about the
+        implementation.
+        """
+        import re
+        from pathlib import Path
+
+        leaking = []
+        for template in Path(settings.BASE_DIR, "templates").rglob("*.html"):
+            text = template.read_text()
+            for match in re.finditer(r"\{#", text):
+                end = text.find("\n", match.start())
+                line = text[match.start():end if end != -1 else len(text)]
+                if "#}" not in line:
+                    leaking.append(f"{template.name}:{text[:match.start()].count(chr(10)) + 1}")
+        self.assertEqual(
+            leaking, [],
+            f"multi-line {{# #}} comments leak into rendered HTML; use "
+            f"{{% comment %}}: {leaking}",
+        )
+
+    def test_rendered_pages_contain_no_developer_notes(self):
+        for page in ("core:home", "core:about", "contact:contact"):
+            with self.subTest(page=page):
+                body = self.client.get(reverse(page)).content.decode()
+                for marker in ("Admin-managed:", "fixed registry", "TODO", "FIXME"):
+                    self.assertNotIn(marker, body)
+
+    def test_no_template_applies_safe_to_database_content(self):
+        """Every |safe in the codebase must render a registry lookup."""
+        import re
+        from pathlib import Path
+
+        offenders = []
+        for template in Path(settings.BASE_DIR, "templates").rglob("*.html"):
+            active = re.sub(r"\{#.*?#\}", "", template.read_text(), flags=re.S)
+            for match in re.findall(r"\{\{\s*([\w.]+)\s*\|safe\s*\}\}", active):
+                # `.icon` resolves through render_icon()/render_social_icon(),
+                # which look up a fixed dict and cannot echo stored input.
+                if not match.endswith(".icon"):
+                    offenders.append(f"{template.name}: {match}")
+        self.assertEqual(offenders, [], f"|safe applied to non-registry values: {offenders}")
 
 
 class PrivacyNoticeTests(TestCase):
@@ -255,3 +305,66 @@ class AssetFingerprintTests(TestCase):
         content = css.read_text(errors="replace")
         self.assertIn("MIT License", content)
         self.assertIn("tailwindcss", content)
+
+
+class SocialLinkTests(TestCase):
+    """The footer's social links, rebuilt as data instead of a |safe sink.
+
+    The original block looped an undefined variable through `{{ net.icon|safe }}`.
+    These assert the replacement cannot become the same hazard.
+    """
+
+    def setUp(self):
+        super().setUp()
+        from apps.core.models import SocialLink
+        self.model = SocialLink
+
+    def test_seeded_links_render_in_the_footer(self):
+        body = self.client.get(reverse("core:home")).content.decode()
+        for link in self.model.objects.live():
+            with self.subTest(link=link.name):
+                self.assertIn(link.url, body)
+                self.assertIn(f'aria-label="{link.name}"', body)
+
+    def test_icon_comes_from_the_registry_not_the_database(self):
+        """The whole point: markup is never taken from editor input."""
+        link = self.model.objects.create(
+            name="Evil", url="https://example.com/",
+            icon_key="<img src=x onerror=alert(1)>", display_order=99,
+        )
+        self.assertEqual(link.icon, "", "unknown key must render nothing")
+        body = self.client.get(reverse("core:home")).content.decode()
+        self.assertNotIn("<img src=x onerror=alert(1)>", body)
+
+    def test_name_and_url_are_escaped(self):
+        self.model.objects.create(
+            name='" onmouseover="alert(1)', url="https://example.com/",
+            icon_key="github", display_order=98,
+        )
+        body = self.client.get(reverse("core:home")).content.decode()
+        self.assertNotIn('" onmouseover="alert(1)', body)
+
+    def test_unpublishing_removes_a_link(self):
+        link = self.model.objects.live().first()
+        link.is_published = False
+        link.save()
+        body = self.client.get(reverse("core:home")).content.decode()
+        self.assertNotIn(f'aria-label="{link.name}"', body)
+
+    def test_display_order_is_respected(self):
+        self.model.objects.all().delete()
+        self.model.objects.create(name="Second", url="https://b.example/", icon_key="x", display_order=20)
+        self.model.objects.create(name="First", url="https://a.example/", icon_key="github", display_order=10)
+        body = self.client.get(reverse("core:home")).content.decode()
+        self.assertLess(body.index("a.example"), body.index("b.example"))
+
+    def test_footer_survives_having_no_links(self):
+        self.model.objects.all().delete()
+        self.assertEqual(self.client.get(reverse("core:home")).status_code, 200)
+
+    def test_admin_exposes_the_section(self):
+        from django.contrib.auth.models import User
+        User.objects.create_superuser("soc", "soc@example.com", "x" * 24)
+        self.client.force_login(User.objects.get(username="soc"))
+        body = self.client.get(reverse("admin:index")).content.decode()
+        self.assertIn("Footer · Social Links", body)
