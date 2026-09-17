@@ -6,6 +6,10 @@ here so it can be maintained from the admin rather than in code.
 Field names deliberately match the template variables they replaced, so the
 templates did not have to change when this content moved out of
 ``apps.core.content``.
+
+Admin labels are named "<page> · <section heading>" using the wording that
+actually appears on the page, so an editor can find the block they are looking
+at without knowing the model names.
 """
 from django.core.cache import cache
 from django.db import models
@@ -112,8 +116,8 @@ class TrustedByLogo(ContentBase):
     name = models.CharField(max_length=120)
 
     class Meta(ContentBase.Meta):
-        verbose_name = "Trusted-By Entry"
-        verbose_name_plural = "Trusted-By Entries"
+        verbose_name = "Home · Trusted-By Entry"
+        verbose_name_plural = "Home · Trusted By"
 
     def __str__(self) -> str:
         # Templates iterate this list and render the object directly.
@@ -128,8 +132,8 @@ class HomeStat(ContentBase):
     label = models.CharField(max_length=120)
 
     class Meta(ContentBase.Meta):
-        verbose_name = "Home Stat"
-        verbose_name_plural = "Home Stats"
+        verbose_name = "Home · Measured Outcome"
+        verbose_name_plural = "Home · Measured Outcomes"
 
     def __str__(self) -> str:
         return f"{self.value}{self.suffix} — {self.label}"
@@ -140,8 +144,8 @@ class HomeFeature(ContentBase, IconMixin):
     body = models.TextField()
 
     class Meta(ContentBase.Meta):
-        verbose_name = "Home Feature"
-        verbose_name_plural = "Home Features"
+        verbose_name = "Home · Why Sectrex Card"
+        verbose_name_plural = "Home · Why Sectrex"
 
     def __str__(self) -> str:
         return self.title
@@ -152,8 +156,8 @@ class CompanyValue(ContentBase):
     body = models.TextField()
 
     class Meta(ContentBase.Meta):
-        verbose_name = "Company Value"
-        verbose_name_plural = "Company Values"
+        verbose_name = "About · Value"
+        verbose_name_plural = "About · Values"
 
     def __str__(self) -> str:
         return self.title
@@ -165,8 +169,8 @@ class ExpertisePillar(ContentBase):
     body = models.TextField()
 
     class Meta(ContentBase.Meta):
-        verbose_name = "Expertise Pillar"
-        verbose_name_plural = "Expertise Pillars"
+        verbose_name = "About · Expertise Area"
+        verbose_name_plural = "About · Expertise"
 
     def __str__(self) -> str:
         return self.title
@@ -181,8 +185,8 @@ class LeadershipMember(ContentBase):
     )
 
     class Meta(ContentBase.Meta):
-        verbose_name = "Leadership Member"
-        verbose_name_plural = "Leadership"
+        verbose_name = "About · Leader"
+        verbose_name_plural = "About · Leadership"
 
     def __str__(self) -> str:
         return f"{self.name} — {self.role}"
@@ -194,8 +198,8 @@ class TimelineEntry(ContentBase):
     body = models.TextField()
 
     class Meta(ContentBase.Meta):
-        verbose_name = "Timeline Entry"
-        verbose_name_plural = "Timeline"
+        verbose_name = "About · Trajectory Entry"
+        verbose_name_plural = "About · Trajectory"
 
     def __str__(self) -> str:
         return f"{self.year} — {self.title}"
@@ -207,8 +211,8 @@ class CulturePillar(ContentBase):
     body = models.TextField()
 
     class Meta(ContentBase.Meta):
-        verbose_name = "Culture Pillar"
-        verbose_name_plural = "Culture Pillars"
+        verbose_name = "Careers · Culture Pillar"
+        verbose_name_plural = "Careers · Culture"
 
     def __str__(self) -> str:
         return self.title
