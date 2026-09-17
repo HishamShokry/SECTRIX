@@ -32,8 +32,10 @@ PY
 fi
 
 # ---- Migrate -------------------------------------------------------------
+# Serialised with a Postgres advisory lock so overlapping container starts
+# (rolling redeploy, restart loop) cannot race each other.
 log "applying migrations…"
-python manage.py migrate --noinput
+python manage.py safe_migrate
 
 # ---- Seed (idempotent) ---------------------------------------------------
 if [[ "${SECTRIX_SEED_DEMO:-true}" == "true" ]]; then

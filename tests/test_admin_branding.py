@@ -1,5 +1,7 @@
 """The admin is branded as the client's console, not stock Django."""
 from django.contrib.auth.models import User
+from django.core.cache import cache
+from django.db import connection
 from django.test import override_settings
 from django.urls import reverse
 
@@ -59,8 +61,15 @@ class AdminBrandingTests(CacheIsolatedTestCase):
         self.assertNotIn("Django administration", body)
 
     def test_branding_survives_a_missing_settings_row(self):
-        """A fresh database must not lock the admin out."""
-        SiteSettings.objects.all().delete()
+        """A fresh database must not lock the admin out.
+
+        Deleted at the SQL layer: the ORM now refuses to remove the singleton,
+        but a brand-new database genuinely has no row yet.
+        """
+        with connection.cursor() as cursor:
+            cursor.execute(f"DELETE FROM {SiteSettings._meta.db_table}")
+        cache.clear()
+        self.assertEqual(SiteSettings.objects.count(), 0)
         self.assertEqual(self.client.get(reverse("admin:index")).status_code, 200)
 
     def test_brand_stylesheet_is_findable(self):

@@ -1,0 +1,92 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="max-w-3xl mx-auto px-6 lg:px-8 py-20">
+  <p class="font-mono text-sm text-accent">Privacy</p>
+  <h1 class="mt-3 font-display text-4xl sm:text-5xl font-semibold tracking-tightest text-white">
+    How we handle your information
+  </h1>
+  <p class="mt-4 text-graphite-300">Last updated {{ last_updated }}.</p>
+
+  <div class="mt-12 space-y-10 text-graphite-200 leading-relaxed">
+
+    <div>
+      <h2 class="font-display text-xl font-semibold text-white">What we collect</h2>
+      <p class="mt-3">
+        This site collects personal data in one place only: the contact form. When you
+        submit it we store the name, work email address, phone number, company, job
+        title, country and organization size you provide, together with the message you
+        write, the time of submission, your browser's user-agent string, and a keyed
+        one-way hash of your IP address.
+      </p>
+      <p class="mt-3">
+        We store a hash rather than the address itself so the value cannot be read back
+        as an IP. It is still linkable to you, so we treat it as personal data and it is
+        covered by everything below. Our web server additionally records access logs in
+        which client IP addresses are truncated before they are written.
+      </p>
+      <p class="mt-3">
+        We do not use advertising or analytics trackers, and the site loads no
+        third-party scripts, fonts or stylesheets. The office map on our contact page is
+        embedded from OpenStreetMap, which will see your IP address if that section
+        loads.
+      </p>
+    </div>
+
+    <div>
+      <h2 class="font-display text-xl font-semibold text-white">Why we hold it, and on what basis</h2>
+      <p class="mt-3">
+        We use what you send solely to respond to your enquiry and to carry out any
+        engagement that follows from it. The legal basis is our legitimate interest in
+        responding to a business approach you initiated, and — where an engagement
+        follows — performance of a contract. We do not use your details for marketing
+        unrelated to your enquiry, and we do not sell, rent or share them with third
+        parties.
+      </p>
+    </div>
+
+    <div>
+      <h2 class="font-display text-xl font-semibold text-white">How long we keep it</h2>
+      <p class="mt-3">
+        Enquiries are retained for {{ retention_days }} days after they are closed, then
+        deleted. If an enquiry becomes a client engagement, the associated records are
+        governed by that engagement's contract instead.
+      </p>
+    </div>
+
+    <div>
+      <h2 class="font-display text-xl font-semibold text-white">Your rights</h2>
+      <p class="mt-3">
+        You can ask us for a copy of what we hold about you, to correct it, to delete it,
+        or to object to our holding it at all. Write to
+        <a class="text-accent hover:text-accent-soft" href="mailto:{{ site.email }}">{{ site.email }}</a>
+        and we will respond within 30 days. If you are in the EU or UK and are not
+        satisfied with our response, you may complain to your national data protection
+        authority.
+      </p>
+    </div>
+
+    <div>
+      <h2 class="font-display text-xl font-semibold text-white">Security</h2>
+      <p class="mt-3">
+        The site is served over TLS, enquiry data is held in an access-controlled
+        database, and administrative access requires an individual account. If you
+        believe you have found a vulnerability in this site, please report it to
+        <a class="text-accent hover:text-accent-soft" href="mailto:{{ site.email }}">{{ site.email }}</a>;
+        we will acknowledge your report and will not pursue action against good-faith
+        research.
+      </p>
+    </div>
+
+    <div>
+      <h2 class="font-display text-xl font-semibold text-white">Who to contact</h2>
+      <p class="mt-3">
+        {{ site.name }}<br>
+        {{ site.address }}<br>
+        <a class="text-accent hover:text-accent-soft" href="mailto:{{ site.email }}">{{ site.email }}</a>
+      </p>
+    </div>
+
+  </div>
+</section>
+{% endblock %}

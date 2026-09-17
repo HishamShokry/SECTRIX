@@ -36,7 +36,8 @@ Before going to prod: set `DJANGO_DEBUG=False`, then verify with `curl -I https:
 
 - **Honeypot field** `website` is a hidden input. Real browsers don't fill it; most spam bots do. `clean_website` rejects any non-empty value with a `ValidationError`. Bots see a normal-looking success path on validation failure (no special treatment) — they don't learn the field is a trap.
 - **Free-email soft-block** rejects gmail, yahoo, hotmail, outlook addresses with a friendly error. This is a quality filter for enterprise inquiries, not a security control. Edit the `free_domains` set to expand or remove.
-- **IP hashing** — `apps/contact/views.py:form_valid` SHA-256-hashes `REMOTE_ADDR` before saving. The plain IP is never persisted. This both reduces PII exposure and still allows repeat-source correlation (same source → same hash).
+- **IP hashing** — `apps/contact/views.py:form_valid` stores a **keyed** hash (`salted_hmac`, keyed on `SECRET_KEY`) of the client address, never the address itself. The key matters: a bare SHA-256 of an IPv4 address is reversible by exhausting the 2^32 address space, so an unkeyed digest pseudonymises nothing. The address is read from `X-Forwarded-For` when `DJANGO_BEHIND_PROXY=True` (nginx overwrites that header) and from `REMOTE_ADDR` otherwise — reading `REMOTE_ADDR` behind a proxy would give every visitor the proxy's address and collapse every row to one value.
+  The result is still **linkable** to a person, so it remains personal data under GDPR and is covered by the same retention rules as the rest of the row.
 - **User-agent truncation** — saved at 400 chars max, to bound storage and resist log-injection-via-UA.
 
 ### 5. Manifest-storage static assets

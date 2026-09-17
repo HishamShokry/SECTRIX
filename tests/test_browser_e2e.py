@@ -111,6 +111,9 @@ class BrowserTests(StaticLiveServerTestCase):
         page.fill("[name='company']", "Example Corp")
         page.fill("[name='message']", "Browser-driven submission test.")
         page.select_option("[name='interest']", "threat_detection")
+        # The form rejects submissions faster than MIN_FILL_SECONDS as
+        # automated, so wait the way a person filling it in would.
+        page.wait_for_timeout(2500)
         page.click("form button[type='submit'], form input[type='submit']")
         page.wait_for_url("**/contact/thanks/**", timeout=5000)
 

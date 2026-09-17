@@ -117,14 +117,21 @@ internal_notes     TextField (blank)
 
 # Diagnostics
 user_agent         CharField(400, blank)         ← truncated on save
-ip_hash            CharField(64, blank)          ← SHA-256 of REMOTE_ADDR; not the IP itself
+ip_hash            CharField(64, blank)          ← keyed HMAC-SHA256 of the client IP
+notified_at        DateTimeField(null)           ← set when the notification email was accepted
 ```
 
-**Why hash the IP?** Three reasons:
+**Why hash the IP?**
 
-1. We don't want raw PII in the DB if the box is ever exfiltrated.
-2. Storing a hash still lets us correlate repeat submissions from the same source.
-3. GDPR-ish defensibility — there is no realistic way to recover the IP from the hash without a known candidate set.
+1. The raw address is not needed for anything we do; the hash supports
+   repeat-source correlation, which is all the field is for.
+2. It is a **keyed** hash (`salted_hmac` over `SECRET_KEY`), not a bare digest.
+   This is the part that matters: IPv4 is a 2^32 keyspace, so an unkeyed
+   SHA-256 is reversed by exhaustive search in seconds and pseudonymises
+   nothing. Without the key the mapping cannot be recomputed.
+3. It is **not** anonymisation. The value is still linkable to a person, so it
+   remains personal data under GDPR and is deleted on the same schedule as the
+   rest of the row (`manage.py purge_inquiries`).
 
 **Lifecycle on submit** (`apps/contact/views.py:ContactView.form_valid`):
 

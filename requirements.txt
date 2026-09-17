@@ -1,5 +1,16 @@
-Django>=5.0,<5.2
-psycopg[binary]>=3.1,<4.0  # PostgreSQL driver (production). Remove for SQLite-only dev.
-Pillow>=10.0,<12.0          # ImageField support for CaseStudy.cover_image
-gunicorn>=21.2,<24.0        # Production WSGI server
+# Runtime dependencies.
+#
+# Floors are set past known-vulnerable ranges, not just "whatever works":
+#   Django  5.2 LTS  — 5.1 is end-of-life and receives no security fixes
+#   gunicorn 23.0    — 21.x/22.x are affected by request-smuggling advisories
+#   Pillow   11.0    — 10.0/10.1 predate the buffer-overflow fixes
+#
+# For reproducible builds, compile this to a hash-pinned lockfile:
+#   pip-compile --generate-hashes requirements.txt -o requirements.lock
+
+Django>=5.2,<5.3            # LTS, supported to April 2028
+psycopg[binary]>=3.2,<4.0   # PostgreSQL driver (production)
+Pillow>=11.0,<12.0          # ImageField support for CaseStudy.cover_image
+gunicorn>=23.0,<24.0        # Production WSGI server
 whitenoise>=6.6,<7.0        # Static asset serving in production
+django-axes>=6.4,<8.0       # Login throttling / lockout for the admin

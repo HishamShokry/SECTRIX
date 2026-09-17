@@ -10,6 +10,7 @@ PUBLIC_PAGES = [
     ("careers:list", "careers/list.html"),
     ("contact:contact", "contact/contact.html"),
     ("contact:thanks", "contact/thanks.html"),
+    ("core:privacy", "core/privacy.html"),
 ]
 
 
@@ -35,7 +36,7 @@ class PublicPageTests(TestCase):
         """A broken nav link is invisible until someone clicks it."""
         for name, _ in PUBLIC_PAGES:
             body = self.client.get(reverse(name)).content.decode()
-            for target, _ in PUBLIC_PAGES[:-1]:  # 'thanks' is not in the nav
+            for target, _ in PUBLIC_PAGES[:-2]:  # 'thanks'/'privacy' are not in the nav
                 with self.subTest(page=name, link=target):
                     self.assertIn(f'href="{reverse(target)}"', body)
 

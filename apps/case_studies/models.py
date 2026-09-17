@@ -1,5 +1,27 @@
+import uuid
+from pathlib import Path
+
+from django.core.validators import FileExtensionValidator
 from django.db import models
 from django.utils.text import slugify
+
+from apps.core.validators import validate_string_list
+
+ALLOWED_IMAGE_EXTENSIONS = ["jpg", "jpeg", "png", "webp"]
+
+
+def case_study_image_path(instance, filename: str) -> str:
+    """Store under a generated name.
+
+    ImageField validates that the *content* parses as an image but not the
+    extension, so a valid image byte stream named ``payload.html`` would be
+    written verbatim and, wherever media is served, returned as text/html
+    from this origin. Discarding the submitted name removes that entirely.
+    """
+    suffix = Path(filename).suffix.lower()
+    if suffix.lstrip(".") not in ALLOWED_IMAGE_EXTENSIONS:
+        suffix = ".jpg"
+    return f"case_studies/{uuid.uuid4().hex}{suffix}"
 
 
 class CaseStudy(models.Model):
@@ -35,8 +57,13 @@ class CaseStudy(models.Model):
         blank=True,
         help_text='Label for the hero metric, e.g. "Reduction in mean time to detect".',
     )
-    cover_image = models.ImageField(upload_to="case_studies/", blank=True, null=True)
-    tags = models.JSONField(default=list, blank=True)
+    cover_image = models.ImageField(
+        upload_to=case_study_image_path,
+        blank=True,
+        null=True,
+        validators=[FileExtensionValidator(ALLOWED_IMAGE_EXTENSIONS)],
+    )
+    tags = models.JSONField(default=list, blank=True, validators=[validate_string_list])
     is_published = models.BooleanField(default=True)
     published_at = models.DateField(null=True, blank=True)
     display_order = models.PositiveIntegerField(default=0)

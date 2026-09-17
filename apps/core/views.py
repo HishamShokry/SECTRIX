@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.shortcuts import render
 from django.views.generic import TemplateView
 
@@ -54,6 +55,27 @@ class AboutView(TemplateView):
             "Sectrex is an enterprise cybersecurity partner founded on the "
             "principle that defense must be engineered with the same rigor as "
             "the systems it protects."
+        )
+        return ctx
+
+
+class PrivacyView(TemplateView):
+    """Privacy notice.
+
+    Required to substantiate the consent line on the contact form, and to state
+    the retention period the purge_inquiries command actually enforces.
+    """
+
+    template_name = "core/privacy.html"
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        ctx["retention_days"] = settings.INQUIRY_RETENTION_DAYS
+        ctx["last_updated"] = "18 September 2026"
+        ctx["meta_title"] = "Privacy · Sectrex Consulting"
+        ctx["meta_description"] = (
+            "How Sectrex Consulting collects, uses, retains and deletes the "
+            "personal information submitted through this site."
         )
         return ctx
 

@@ -1,13 +1,46 @@
-import hashlib
+import logging
 
 from django.conf import settings
 from django.contrib import messages
 from django.core.mail import send_mail
-from django.shortcuts import redirect, render
+from django.shortcuts import render
 from django.urls import reverse_lazy
+from django.utils import timezone
+from django.utils.crypto import salted_hmac
 from django.views.generic.edit import FormView
 
 from .forms import ContactInquiryForm
+
+logger = logging.getLogger(__name__)
+
+
+def client_ip(request) -> str:
+    """Best-effort client address.
+
+    REMOTE_ADDR is the proxy's address once nginx is in front, so every
+    visitor would otherwise collapse to one value. nginx overwrites
+    X-Forwarded-For, which makes its leftmost entry trustworthy — but only
+    when we know we are actually behind that proxy.
+    """
+    if getattr(settings, "BEHIND_PROXY", False):
+        forwarded = request.META.get("HTTP_X_FORWARDED_FOR", "")
+        if forwarded:
+            return forwarded.split(",")[0].strip()
+    return request.META.get("REMOTE_ADDR", "")
+
+
+def hash_ip(ip: str) -> str:
+    """Keyed hash of a client address.
+
+    A bare SHA-256 of an IPv4 address is reversible by exhausting the 2**32
+    address space, so it pseudonymises nothing. Keying with SECRET_KEY means
+    the mapping cannot be recomputed without the key. Note the result is
+    still personal data under GDPR — it is linkable — so it stays subject to
+    the same retention rules as the rest of the row.
+    """
+    if not ip:
+        return ""
+    return salted_hmac("sectrex.contact.ip", ip, algorithm="sha256").hexdigest()
 
 
 class ContactView(FormView):
@@ -53,15 +86,16 @@ class ContactView(FormView):
     def form_valid(self, form):
         inquiry = form.save(commit=False)
         inquiry.user_agent = self.request.META.get("HTTP_USER_AGENT", "")[:400]
-        ip = self.request.META.get("REMOTE_ADDR", "")
-        if ip:
-            inquiry.ip_hash = hashlib.sha256(ip.encode()).hexdigest()
+        inquiry.ip_hash = hash_ip(client_ip(self.request))
         inquiry.save()
 
-        # Notify inbox; backend defaults to console in dev (see settings).
+        # Notify the inbox. Errors are logged rather than swallowed: a
+        # submitter could otherwise suppress the notification entirely (a
+        # newline in a header field raises BadHeaderError), and an SMTP
+        # outage would lose inquiries with no operational signal.
         try:
             send_mail(
-                subject=f"[Sectrex] New inquiry — {inquiry.company} ({inquiry.get_interest_display()})",
+                subject=f"[Sectrex] New {inquiry.get_interest_display()} inquiry",
                 message=(
                     f"From: {inquiry.full_name} <{inquiry.work_email}>\n"
                     f"Company: {inquiry.company}\n"
@@ -74,10 +108,18 @@ class ContactView(FormView):
                 ),
                 from_email=settings.DEFAULT_FROM_EMAIL,
                 recipient_list=[settings.CONTACT_INBOX],
-                fail_silently=True,
+                fail_silently=False,
             )
+            inquiry.notified_at = timezone.now()
+            inquiry.save(update_fields=["notified_at"])
         except Exception:
-            pass
+            # The inquiry is saved either way, so the submitter is not
+            # penalised for our mail problem — but we must know about it.
+            logger.exception(
+                "Contact notification failed for inquiry %s (%s)",
+                inquiry.pk,
+                inquiry.company,
+            )
 
         messages.success(self.request, "Thank you — a Sectrex specialist will reach out within one business day.")
         return super().form_valid(form)

@@ -3,6 +3,7 @@
 This is the guarantee the admin migration was built for, so each editable
 block is exercised: edit it, hide it, reorder it.
 """
+from django.db.models import ProtectedError
 from django.test import TestCase
 from django.urls import reverse
 
@@ -75,9 +76,26 @@ class SiteSettingsTests(CacheIsolatedTestCase):
         SiteSettings.objects.create(name="Second Row")
         self.assertEqual(SiteSettings.objects.count(), 1)
 
-    def test_refuses_deletion(self):
+    def test_refuses_instance_deletion(self):
         """The site cannot render without these values."""
-        SiteSettings.load().delete()
+        with self.assertRaises(ProtectedError):
+            SiteSettings.load().delete()
+        self.assertEqual(SiteSettings.objects.count(), 1)
+
+    def test_refuses_queryset_deletion(self):
+        """Regression: Model.delete() is not called for bulk deletes.
+
+        The guard used to live only on the instance method, so
+        `objects.all().delete()` removed the row and the site silently
+        reverted to field defaults.
+        """
+        SiteSettings.load()
+        with self.assertRaises(ProtectedError):
+            SiteSettings.objects.all().delete()
+        self.assertEqual(SiteSettings.objects.count(), 1)
+
+        with self.assertRaises(ProtectedError):
+            SiteSettings.objects.filter(pk=1).delete()
         self.assertEqual(SiteSettings.objects.count(), 1)
 
 

@@ -21,6 +21,18 @@ DOMAIN="${DOMAIN:?set DOMAIN=yourdomain.com}"
 EMAIL="${EMAIL:?set EMAIL=you@yourdomain.com for certbot expiry notices}"
 APP_DIR="${APP_DIR:-/opt/sectrix}"
 
+# DOMAIN is spliced into a sed replacement and written to a root-owned nginx
+# config, so `/`, `;`, `}` or a newline in it would inject directives (or, via
+# GNU sed's e flag, run commands as root). Constrain it to a hostname.
+if ! [[ "$DOMAIN" =~ ^[a-zA-Z0-9]([a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(\.[a-zA-Z0-9]([a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)+$ ]]; then
+  echo "refusing to run: DOMAIN='${DOMAIN}' is not a valid hostname" >&2
+  exit 1
+fi
+if ! [[ "$EMAIL" =~ ^[^[:space:]@]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$ ]]; then
+  echo "refusing to run: EMAIL='${EMAIL}' is not a valid address" >&2
+  exit 1
+fi
+
 log() { printf '\033[36m[bootstrap]\033[0m %s\n' "$*" >&2; }
 
 # ---- 0. Fresh-host preflight --------------------------------------------
@@ -155,6 +167,26 @@ ln -sf /etc/nginx/sites-available/sectrix /etc/nginx/sites-enabled/sectrix
 rm -f /etc/nginx/sites-enabled/default
 mkdir -p /var/www/certbot
 nginx -t && systemctl reload nginx
+
+# ---- 6b. Log retention ---------------------------------------------------
+# The access log is anonymised (see deploy/nginx.conf) but still grows without
+# bound; cap retention so it is not an open-ended data store.
+log "installing logrotate policy for nginx…"
+cat > /etc/logrotate.d/sectrix <<'ROTATE'
+/var/log/nginx/sectrix.*.log {
+    daily
+    rotate 14
+    missingok
+    notifempty
+    compress
+    delaycompress
+    create 0640 www-data adm
+    sharedscripts
+    postrotate
+        [ -f /var/run/nginx.pid ] && kill -USR1 `cat /var/run/nginx.pid`
+    endscript
+}
+ROTATE
 
 # ---- 7. TLS --------------------------------------------------------------
 log "requesting certificate…"

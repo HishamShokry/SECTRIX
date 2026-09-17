@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.db import models
 
 
@@ -33,8 +34,22 @@ class ContactInquiry(models.Model):
 
     # Lifecycle
     created_at = models.DateTimeField(auto_now_add=True)
+    notified_at = models.DateTimeField(
+        null=True,
+        blank=True,
+        help_text="Set when the notification email was accepted for delivery. "
+                  "Empty means nobody was told about this inquiry.",
+    )
     is_handled = models.BooleanField(default=False)
-    handled_by = models.CharField(max_length=120, blank=True)
+    handled_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="handled_inquiries",
+        help_text="Staff member who took ownership. A real account, so this "
+                  "cannot be self-asserted free text.",
+    )
     internal_notes = models.TextField(blank=True)
 
     # Light spam control

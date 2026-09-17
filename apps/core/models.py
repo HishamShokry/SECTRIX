@@ -56,6 +56,19 @@ class IconMixin(models.Model):
         return render_icon(self.icon_key)
 
 
+class SiteSettingsQuerySet(models.QuerySet):
+    def delete(self):
+        """Block bulk deletion.
+
+        ``Model.delete()`` is only called for single instances, so an override
+        there leaves ``SiteSettings.objects.all().delete()`` free to remove the
+        row — which silently reverts the site's identity to field defaults.
+        """
+        raise models.ProtectedError(
+            "SiteSettings is a singleton and cannot be deleted.", list(self)
+        )
+
+
 class SiteSettings(models.Model):
     """Site-wide identity and contact details. A single row.
 
@@ -64,6 +77,8 @@ class SiteSettings(models.Model):
     """
 
     CACHE_KEY = "core.sitesettings"
+
+    objects = SiteSettingsQuerySet.as_manager()
 
     name = models.CharField(max_length=120, default="Sectrex Consulting")
     tagline = models.CharField(max_length=200, blank=True)
@@ -96,9 +111,15 @@ class SiteSettings(models.Model):
         super().save(*args, **kwargs)
         cache.delete(self.CACHE_KEY)
 
-    def delete(self, *args, **kwargs):  # pragma: no cover - guarded in admin too
-        """Refuse deletion; the site needs these values to render."""
-        return
+    def delete(self, *args, **kwargs):
+        """Refuse deletion; the site needs these values to render.
+
+        Raises rather than returning silently so a caller learns the operation
+        was refused instead of assuming it succeeded.
+        """
+        raise models.ProtectedError(
+            "SiteSettings is a singleton and cannot be deleted.", [self]
+        )
 
     @classmethod
     def load(cls) -> "SiteSettings":

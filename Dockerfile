@@ -56,9 +56,12 @@ COPY --from=css /build/static/fonts /app/static/fonts
 COPY --from=css /build/static/js /app/static/js
 
 # Non-root runtime user with write access to runtime dirs.
+# Only the runtime directories are writable by the app user. Leaving the
+# source tree root-owned means an arbitrary-file-write bug cannot overwrite a
+# .py file and become persistent code execution on the next worker respawn.
 RUN useradd --create-home --shell /usr/sbin/nologin --uid 1000 sectrix \
  && mkdir -p /app/staticfiles /app/media \
- && chown -R sectrix:sectrix /app
+ && chown -R sectrix:sectrix /app/staticfiles /app/media
 
 USER sectrix
 

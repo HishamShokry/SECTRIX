@@ -1,6 +1,8 @@
 from django.db import models
 from django.utils.text import slugify
 
+from apps.core.validators import validate_string_list
+
 from apps.core.icons import ICON_CHOICES, render_icon
 
 
@@ -37,6 +39,7 @@ class Service(models.Model):
     capabilities = models.JSONField(
         default=list,
         blank=True,
+        validators=[validate_string_list],
         help_text='List of bullet capabilities, e.g. ["24/7 SOC", "MITRE ATT&CK mapped"].',
     )
     display_order = models.PositiveIntegerField(default=0)

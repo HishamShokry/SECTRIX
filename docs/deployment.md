@@ -81,6 +81,36 @@ docker compose exec web python manage.py createsuperuser
 The entrypoint migrates, seeds demo content (while `SECTRIX_SEED_DEMO=true`),
 and runs collectstatic before handing off to Gunicorn.
 
+## Security configuration
+
+`apps/core/checks.py` runs on every `manage.py` invocation (including the
+container entrypoint's `safe_migrate`) and **refuses to start** a production
+deployment that would leak data or sign with a placeholder key:
+
+| Check | Fails when |
+|---|---|
+| `sectrex.E001` | `DJANGO_EMAIL_BACKEND` is the console backend, which prints full inquiry PII to the container log |
+| `sectrex.E002` | `DJANGO_SECRET_KEY` is one of the placeholders committed to this repo |
+| `sectrex.W003` | `DJANGO_ALLOWED_HOSTS` still holds only local defaults |
+| `sectrex.W004` | `DJANGO_BEHIND_PROXY` is unset, so HTTPS cannot be detected |
+
+Set `DJANGO_BEHIND_PROXY=True` whenever nginx terminates TLS in front of the
+app. It enables `SECURE_PROXY_SSL_HEADER` and `SECURE_SSL_REDIRECT` — but only
+set it if the app is **not** also reachable directly, or a client can forge
+`X-Forwarded-Proto`. `docker-compose.yml` publishes the app on `127.0.0.1:8001`
+for exactly that reason.
+
+### Scheduled maintenance
+
+Contact inquiries do not expire on their own. Schedule the purge:
+
+```bash
+# /etc/cron.d/sectrix-retention
+0 3 * * * root cd /opt/sectrix && docker compose exec -T web python manage.py purge_inquiries
+```
+
+Check what it would remove first with `purge_inquiries --dry-run`.
+
 ## Demo-content mode
 
 The site currently ships placeholder marketing copy. Two guards are wired to

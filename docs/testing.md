@@ -6,8 +6,12 @@ production configuration. 52 tests, no external services required.
 ## Running
 
 ```bash
+# Set up once (the repo is not installable against a PEP 668 system Python)
+python3 -m venv .venv && .venv/bin/pip install -r requirements.txt playwright
+.venv/bin/playwright install chromium
+
 # Everything, including real-browser tests
-DJANGO_DEBUG=False python manage.py test tests
+DJANGO_DEBUG=False .venv/bin/python manage.py test tests
 
 # Fast layer only — skips Playwright, runs in ~1.5s
 DJANGO_DEBUG=False SKIP_BROWSER_TESTS=1 python manage.py test tests

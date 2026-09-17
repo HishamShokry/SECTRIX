@@ -40,6 +40,17 @@
   }
   [data-reveal].in-view { opacity: 1; transform: none; }
 
+  /* Honeypot field: off-screen for humans, present in the DOM for bots.
+     Deliberately not display:none — some bots skip hidden inputs. */
+  .hp-field {
+    position: absolute !important;
+    left: -9999px !important;
+    width: 1px;
+    height: 1px;
+    opacity: 0;
+    pointer-events: none;
+  }
+
   /* Alpine sets x-cloak until it initialises; without this the mobile menu
      flashes open on load. */
   [x-cloak] { display: none !important; }

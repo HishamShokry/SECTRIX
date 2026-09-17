@@ -1,6 +1,8 @@
 from django.db import models
 from django.utils.text import slugify
 
+from apps.core.validators import validate_string_list
+
 
 class JobOpening(models.Model):
     DEPARTMENT_CHOICES = [
@@ -37,8 +39,8 @@ class JobOpening(models.Model):
     is_remote_friendly = models.BooleanField(default=False)
     summary = models.CharField(max_length=240)
     description = models.TextField()
-    requirements = models.JSONField(default=list, blank=True)
-    nice_to_have = models.JSONField(default=list, blank=True)
+    requirements = models.JSONField(default=list, blank=True, validators=[validate_string_list])
+    nice_to_have = models.JSONField(default=list, blank=True, validators=[validate_string_list])
     is_published = models.BooleanField(default=True)
     posted_at = models.DateField(auto_now_add=True)
     closes_at = models.DateField(null=True, blank=True)
