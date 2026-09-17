@@ -58,3 +58,26 @@ class PublicPageTests(TestCase):
             with self.subTest(page=name):
                 body = self.client.get(reverse(name)).content.decode()
                 self.assertGreater(len(body), 5000, f"{name} rendered suspiciously small")
+
+
+class StylesheetTests(TestCase):
+    """Tailwind is compiled at build time, not fetched from the Play CDN."""
+
+    def test_compiled_stylesheet_is_linked(self):
+        body = self.client.get(reverse("core:home")).content.decode()
+        self.assertRegex(body, r'<link rel="stylesheet" href="[^"]*css/tailwind[^"]*\.css"')
+
+    def test_play_cdn_is_not_referenced(self):
+        """The Play CDN ships a compiler to every visitor and is dev-only."""
+        for name, _ in PUBLIC_PAGES:
+            with self.subTest(page=name):
+                body = self.client.get(reverse(name)).content.decode()
+                self.assertNotIn("cdn.tailwindcss.com", body)
+                self.assertNotIn("tailwind.config", body)
+
+    def test_stylesheet_is_actually_served(self):
+        from django.contrib.staticfiles import finders
+        self.assertIsNotNone(
+            finders.find("css/tailwind.css"),
+            "static/css/tailwind.css missing — run: npm run build:css",
+        )

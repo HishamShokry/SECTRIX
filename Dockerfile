@@ -1,5 +1,25 @@
 # syntax=docker/dockerfile:1.7
 
+# ---- CSS build -----------------------------------------------------------
+# Tailwind is compiled here rather than loaded from the Play CDN, which is a
+# development tool: it ships a compiler to every visitor and leaves the site
+# unstyled whenever the CDN is unreachable.
+FROM node:22-alpine AS css
+
+WORKDIR /build
+
+COPY package.json package-lock.json ./
+RUN npm ci --no-audit --no-fund
+
+# Only what Tailwind scans for class names, so edits elsewhere reuse the layer.
+COPY tailwind.config.js ./
+COPY static/src ./static/src
+COPY templates ./templates
+COPY apps ./apps
+
+RUN npx tailwindcss -i ./static/src/input.css -o ./static/css/tailwind.css --minify
+
+
 # ---- Base ----------------------------------------------------------------
 FROM python:3.12-slim AS base
 
@@ -25,6 +45,9 @@ COPY requirements.txt ./
 RUN pip install -r requirements.txt
 
 COPY . .
+
+# Freshly compiled CSS overwrites whatever the repo carried for local dev.
+COPY --from=css /build/static/css/tailwind.css /app/static/css/tailwind.css
 
 # Non-root runtime user with write access to runtime dirs.
 RUN useradd --create-home --shell /usr/sbin/nologin --uid 1000 sectrix \

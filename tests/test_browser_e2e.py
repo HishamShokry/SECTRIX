@@ -15,6 +15,7 @@ import unittest
 os.environ.setdefault("DJANGO_ALLOW_ASYNC_UNSAFE", "1")
 
 from django.contrib.staticfiles.testing import StaticLiveServerTestCase
+from django.test import override_settings
 from django.urls import reverse
 
 try:
@@ -28,6 +29,16 @@ PAGES = ["core:home", "core:about", "services:list",
 
 @unittest.skipIf(os.environ.get("SKIP_BROWSER_TESTS") == "1", "browser tests disabled")
 @unittest.skipIf(sync_playwright is None, "playwright not installed")
+# The live server serves static files through the finders, which know the
+# source paths. ManifestStaticFilesStorage would have {% static %} emit hashed
+# names that only exist after collectstatic, so the stylesheet would 404 and
+# every page would render unstyled.
+@override_settings(
+    STORAGES={
+        "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
+        "staticfiles": {"BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage"},
+    }
+)
 class BrowserTests(StaticLiveServerTestCase):
     @classmethod
     def setUpClass(cls):
@@ -113,4 +124,28 @@ class BrowserTests(StaticLiveServerTestCase):
         page.click(f"a[href='{reverse('services:list')}']")
         page.wait_for_url(f"**{reverse('services:list')}")
         self.assertIn("Services", page.title())
+        page.close()
+
+    def test_brand_styles_are_actually_applied(self):
+        """A broken stylesheet link still renders valid HTML, so check pixels.
+
+        navy-950 (#060F22) is rgb(6, 15, 34); an unstyled page would be white.
+        """
+        page = self.browser.new_page()
+        self.open(page, "core:home")
+        page.wait_for_load_state("networkidle")
+        background = page.evaluate(
+            "() => getComputedStyle(document.body).backgroundColor"
+        )
+        self.assertEqual(background, "rgb(6, 15, 34)")
+        page.close()
+
+    def test_stylesheet_loads_without_a_network_error(self):
+        page = self.browser.new_page()
+        failed = []
+        page.on("requestfailed", lambda r: failed.append(r.url))
+        page.on("response", lambda r: failed.append(r.url) if r.status >= 400 and "css" in r.url else None)
+        self.open(page, "core:home")
+        page.wait_for_load_state("networkidle")
+        self.assertEqual([u for u in failed if "tailwind" in u], [])
         page.close()

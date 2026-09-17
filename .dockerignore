@@ -25,3 +25,5 @@ node_modules
 Thumbs.db
 /sectrex-*.svg
 README.md
+
+# package-lock.json is NOT ignored: the css build stage needs it for npm ci.

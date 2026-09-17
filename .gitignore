@@ -27,3 +27,4 @@ Thumbs.db
 # Build artifacts
 node_modules/
 dist/
+node_modules/

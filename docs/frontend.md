@@ -160,3 +160,44 @@ These are referenced from OG metadata and JSON-LD; the navbar and footer use the
 - Focus styles preserved via Tailwind's default ring on form inputs.
 - `aria-label` on icon-only buttons (menu toggle, social links).
 - `data-reveal` animations respect that an element starts hidden — if JS is disabled, all `[data-reveal]` elements remain at opacity 0. **TODO**: add a `<noscript>` rule to force `.in-view` in that case.
+
+## Tailwind build
+
+Tailwind is **compiled at build time**. It used to load from the Play CDN
+(`cdn.tailwindcss.com`), which is a development tool: it ships a compiler to
+every visitor, re-generates the CSS on each page load, and leaves the site
+completely unstyled whenever the CDN is blocked or unreachable.
+
+```bash
+npm install          # once
+npm run build:css    # static/src/input.css -> static/css/tailwind.css (minified)
+npm run watch:css    # rebuild on change while developing
+```
+
+| File | Purpose |
+|---|---|
+| `tailwind.config.js` | Brand palette, fonts, shadows, keyframes — ported verbatim from the old inline config |
+| `static/src/input.css` | Tailwind directives plus the base/utility rules that were inline in `base.html` |
+| `static/css/tailwind.css` | Build output, linked by `base.html` |
+
+`content` globs cover `templates/**/*.html` **and `apps/**/*.py`** — the contact
+form declares its widget classes in Python (`apps/contact/forms.py`), so
+excluding it would purge the form styling.
+
+### Rebuilding after template edits
+
+Tailwind only emits classes it finds in the `content` globs, so a class used for
+the first time needs a rebuild. Production does this automatically: the
+`css` stage in the `Dockerfile` runs the build with Node and copies the result
+into the Python image, so `docker compose up --build` is always current.
+
+`static/css/tailwind.css` is committed so a fresh clone renders correctly with
+`runserver` and no Node installed. It is regenerated during the image build, so
+a stale committed copy never reaches production.
+
+### Still on a CDN
+
+Alpine.js and the Inter/JetBrains Mono webfonts still load from jsdelivr and
+Google Fonts. They are versioned, cacheable files rather than a compiler, so the
+cost is lower — but vendoring them would remove the last third-party runtime
+dependencies.
