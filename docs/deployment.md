@@ -81,6 +81,33 @@ docker compose exec web python manage.py createsuperuser
 The entrypoint migrates, seeds demo content (while `SECTRIX_SEED_DEMO=true`),
 and runs collectstatic before handing off to Gunicorn.
 
+## nginx hardening on a certbot-managed host
+
+When certbot writes its own vhost (the usual case), this repo's
+`deploy/nginx.conf` is not what is serving. Install the host-wide drop-in so
+the hardening applies to every vhost and to nginx's own error pages:
+
+```bash
+scp deploy/nginx-security-headers.conf root@HOST:/etc/nginx/conf.d/00-security.conf
+ssh root@HOST 'nginx -t && systemctl reload nginx'
+```
+
+It sets `server_tokens off` (the default banner advertises the exact build and
+distribution, e.g. `nginx/1.24.0 (Ubuntu)`, which is a free version-to-CVE
+lookup), adds CSP and `Permissions-Policy`, and declares the rate-limit zones.
+
+The zones still need applying inside the vhost's `location` blocks:
+
+```nginx
+location /contact/ { limit_req zone=contact burst=3 nodelay; ... }
+location /admin/   { limit_req zone=admin   burst=5 nodelay; ... }
+location /         { limit_req zone=general burst=40 nodelay; ... }
+```
+
+Verify: `curl -sSI https://your-domain/ | grep -i server` should read
+`Server: nginx` with no version. To remove the header entirely, install
+`nginx-extras` and add `more_clear_headers Server;`.
+
 ## Security configuration
 
 `apps/core/checks.py` runs on every `manage.py` invocation (including the
