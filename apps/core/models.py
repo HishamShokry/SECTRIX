@@ -88,8 +88,11 @@ class SiteSettings(models.Model):
         return self.name
 
     def save(self, *args, **kwargs):
-        # Singleton: always row 1, so the admin can never create a second.
+        # Singleton: always row 1, so a second row cannot exist. force_insert
+        # is dropped so ``objects.create()`` updates row 1 instead of raising
+        # an IntegrityError against the existing primary key.
         self.pk = 1
+        kwargs.pop("force_insert", None)
         super().save(*args, **kwargs)
         cache.delete(self.CACHE_KEY)
 
