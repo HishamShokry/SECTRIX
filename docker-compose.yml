@@ -45,9 +45,14 @@ services:
       POSTGRES_HOST:            db
       POSTGRES_PORT:            5432
 
-      DJANGO_EMAIL_BACKEND:     django.core.mail.backends.console.EmailBackend
-      DEFAULT_FROM_EMAIL:       noreply@sectrix.com
-      CONTACT_INBOX:            contact@sectrix.com
+      DJANGO_EMAIL_BACKEND:     ${DJANGO_EMAIL_BACKEND:-django.core.mail.backends.console.EmailBackend}
+      EMAIL_HOST:               ${EMAIL_HOST:-}
+      EMAIL_PORT:               ${EMAIL_PORT:-587}
+      EMAIL_HOST_USER:          ${EMAIL_HOST_USER:-}
+      EMAIL_HOST_PASSWORD:      ${EMAIL_HOST_PASSWORD:-}
+      EMAIL_USE_TLS:            ${EMAIL_USE_TLS:-True}
+      DEFAULT_FROM_EMAIL:       ${DEFAULT_FROM_EMAIL:-noreply@sectrix.com}
+      CONTACT_INBOX:            ${CONTACT_INBOX:-contact@sectrix.com}
 
       SECTRIX_SEED_DEMO:        ${SECTRIX_SEED_DEMO:-true}
       SITE_URL:                 ${SITE_URL:-http://localhost:8001}

@@ -175,6 +175,10 @@ if not DEBUG:
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
+# Search-engine indexing. Keep this False while the site is serving demo
+# content so placeholder copy is not indexed or cached by crawlers.
+ALLOW_INDEXING = env_bool("DJANGO_ALLOW_INDEXING", False)
+
 SITE_META = {
     "name": "Sectrix",
     "tagline": "Enterprise Cybersecurity for the Modern Threat Landscape",
