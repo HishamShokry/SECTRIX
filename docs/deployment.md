@@ -87,10 +87,20 @@ When certbot writes its own vhost (the usual case), this repo's
 `deploy/nginx.conf` is not what is serving. Install the host-wide drop-in so
 the hardening applies to every vhost and to nginx's own error pages:
 
+Keep a checkout on the nginx host, separate from the application's, and pull:
+
 ```bash
-scp deploy/nginx-security-headers.conf root@HOST:/etc/nginx/conf.d/00-security.conf
-ssh root@HOST 'nginx -t && systemctl reload nginx'
+# once
+git clone https://github.com/HishamShokry/SECTRIX.git /opt/sectrix-deploy
+
+# now, and after any future change to the nginx config
+cd /opt/sectrix-deploy && git pull
+sudo ./deploy/install-nginx-config.sh
 ```
+
+The installer backs up whatever it replaces, runs `nginx -t`, and **rolls back
+automatically** if the new config is rejected, so a bad change cannot take the
+site down.
 
 It sets `server_tokens off` (the default banner advertises the exact build and
 distribution, e.g. `nginx/1.24.0 (Ubuntu)`, which is a free version-to-CVE
