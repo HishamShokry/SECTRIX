@@ -17,7 +17,10 @@ COPY static/src ./static/src
 COPY templates ./templates
 COPY apps ./apps
 
-RUN npx tailwindcss -i ./static/src/input.css -o ./static/css/tailwind.css --minify
+# Copy Alpine and the variable fonts out of node_modules, then compile the CSS
+# (which carries the @font-face rules pointing at those files).
+RUN npm run vendor \
+ && npx tailwindcss -i ./static/src/input.css -o ./static/css/tailwind.css --minify
 
 
 # ---- Base ----------------------------------------------------------------
@@ -46,8 +49,11 @@ RUN pip install -r requirements.txt
 
 COPY . .
 
-# Freshly compiled CSS overwrites whatever the repo carried for local dev.
+# Freshly built front-end assets overwrite whatever the repo carried for local
+# dev, so a stale committed copy can never reach production.
 COPY --from=css /build/static/css/tailwind.css /app/static/css/tailwind.css
+COPY --from=css /build/static/fonts /app/static/fonts
+COPY --from=css /build/static/js /app/static/js
 
 # Non-root runtime user with write access to runtime dirs.
 RUN useradd --create-home --shell /usr/sbin/nologin --uid 1000 sectrix \

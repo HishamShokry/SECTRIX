@@ -75,6 +75,34 @@ class StylesheetTests(TestCase):
                 self.assertNotIn("cdn.tailwindcss.com", body)
                 self.assertNotIn("tailwind.config", body)
 
+    def test_no_third_party_runtime_assets(self):
+        """Scripts, styles and fonts are all self-hosted.
+
+        The OpenStreetMap iframe on the contact page is a deliberate exception:
+        a map cannot be vendored.
+        """
+        forbidden = ("cdn.jsdelivr.net", "fonts.googleapis.com",
+                     "fonts.gstatic.com", "cdn.tailwindcss.com", "unpkg.com")
+        for name, _ in PUBLIC_PAGES:
+            body = self.client.get(reverse(name)).content.decode()
+            for origin in forbidden:
+                with self.subTest(page=name, origin=origin):
+                    self.assertNotIn(origin, body)
+
+    def test_vendored_assets_are_findable(self):
+        from django.contrib.staticfiles import finders
+        for asset in ("css/tailwind.css", "js/alpine.min.js",
+                      "fonts/inter-latin-wght-normal.woff2",
+                      "fonts/jetbrains-mono-latin-wght-normal.woff2"):
+            with self.subTest(asset=asset):
+                self.assertIsNotNone(
+                    finders.find(asset), f"{asset} missing — run: npm run build",
+                )
+
+    def test_alpine_is_loaded_from_our_own_static_files(self):
+        body = self.client.get(reverse("core:home")).content.decode()
+        self.assertRegex(body, r'<script defer src="[^"]*js/alpine[^"]*\.js"')
+
     def test_stylesheet_is_actually_served(self):
         from django.contrib.staticfiles import finders
         self.assertIsNotNone(

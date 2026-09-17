@@ -195,9 +195,34 @@ into the Python image, so `docker compose up --build` is always current.
 `runserver` and no Node installed. It is regenerated during the image build, so
 a stale committed copy never reaches production.
 
-### Still on a CDN
+### Vendored assets
 
-Alpine.js and the Inter/JetBrains Mono webfonts still load from jsdelivr and
-Google Fonts. They are versioned, cacheable files rather than a compiler, so the
-cost is lower — but vendoring them would remove the last third-party runtime
-dependencies.
+Nothing the browser needs to render the site is fetched from a third party.
+
+| Asset | Source | Size |
+|---|---|---|
+| `static/js/alpine.min.js` | `alpinejs@3.14.1` | 44 KB |
+| `static/fonts/inter-latin-wght-normal.woff2` | `@fontsource-variable/inter` | 48 KB |
+| `static/fonts/jetbrains-mono-latin-wght-normal.woff2` | `@fontsource-variable/jetbrains-mono` | 40 KB |
+
+`npm run vendor` copies them out of `node_modules`; `npm run build` does that
+and compiles the CSS. Both run in the Docker `css` stage, so the image is always
+built from the pinned package versions rather than whatever is committed.
+
+These are **variable** fonts: one file covers Inter 100–900 and JetBrains Mono
+100–800, so the six Inter weights the site uses cost a single request instead of
+six. Only the upright latin subset is vendored — the templates use `not-italic`
+and no italic face. The `@font-face` rules live in `static/src/input.css` and
+are compiled into `tailwind.css`, so `collectstatic` rewrites their `url()`
+references to the hashed filenames automatically.
+
+Inter is preloaded in `base.html` because it blocks first paint; JetBrains Mono
+is used only for small accent labels and is not worth a preload.
+
+### The one remaining third-party embed
+
+`templates/contact/contact.html` embeds an OpenStreetMap iframe for the office
+map. A map cannot meaningfully be self-hosted, and it is `loading="lazy"` so it
+does not block the page — but it does disclose visitor IP addresses to
+openstreetmap.org, which matters if the privacy policy claims otherwise. Replace
+it with a static image if that is a concern.

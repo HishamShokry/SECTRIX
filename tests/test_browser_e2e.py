@@ -149,3 +149,36 @@ class BrowserTests(StaticLiveServerTestCase):
         page.wait_for_load_state("networkidle")
         self.assertEqual([u for u in failed if "tailwind" in u], [])
         page.close()
+
+    def test_alpine_initialises_from_the_vendored_bundle(self):
+        page = self.browser.new_page()
+        self.open(page, "core:home")
+        page.wait_for_load_state("networkidle")
+        self.assertTrue(page.evaluate("() => !!window.Alpine"), "Alpine did not load")
+        page.close()
+
+    def test_self_hosted_font_is_used(self):
+        page = self.browser.new_page()
+        self.open(page, "core:home")
+        page.wait_for_load_state("networkidle")
+        loaded = page.evaluate(
+            "() => document.fonts.check('16px Inter')"
+        )
+        self.assertTrue(loaded, "Inter did not resolve from the vendored woff2")
+        page.close()
+
+    def test_page_loads_with_no_external_requests(self):
+        """Nothing should leave the origin except the deliberate map iframe."""
+        page = self.browser.new_page()
+        external = []
+        page.on("request", lambda r: (
+            external.append(r.url)
+            if not r.url.startswith(self.live_server_url)
+            and not r.url.startswith("data:")
+            and "openstreetmap" not in r.url
+            else None
+        ))
+        self.open(page, "core:home")
+        page.wait_for_load_state("networkidle")
+        self.assertEqual(external, [], f"external requests: {external}")
+        page.close()

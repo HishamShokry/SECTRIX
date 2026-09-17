@@ -1,3 +1,23 @@
+/* Self-hosted variable fonts, vendored from @fontsource-variable via
+   `npm run vendor`. Family names match tailwind.config.js. The single
+   variable file covers every weight the site uses, so there is no per-weight
+   request and no third-party font host. */
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 100 900;
+  src: url('../fonts/inter-latin-wght-normal.woff2') format('woff2-variations');
+}
+
+@font-face {
+  font-family: 'JetBrains Mono';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 100 800;
+  src: url('../fonts/jetbrains-mono-latin-wght-normal.woff2') format('woff2-variations');
+}
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
