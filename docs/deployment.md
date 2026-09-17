@@ -120,9 +120,36 @@ existing `location /`, so the upstream is whatever the file already uses rather
 than a hardcoded address, and it leaves every certbot-managed line untouched.
 Re-running is a no-op.
 
-Verify: `curl -sSI https://your-domain/ | grep -i server` should read
-`Server: nginx` with no version. To remove the header entirely, install
-`nginx-extras` and add `more_clear_headers Server;`.
+### Removing the Server header entirely
+
+`server_tokens off` only shortens the header to `nginx`. To drop it completely,
+pass `--hide-server`:
+
+```bash
+sudo ./deploy/install-nginx-config.sh --hide-server \
+  --with-ratelimit /etc/nginx/sites-enabled/sectrexconsulting.com
+```
+
+That installs `libnginx-mod-http-headers-more-filter` if it is missing, then
+adds `more_clear_headers Server;`. The directive lives in its own file
+(`01-hide-server.conf`) because it is not a core directive: loading it without
+the module makes nginx refuse to start. The installer therefore only writes it
+once the module is actually present, and falls back to leaving the header as
+`nginx` if the package cannot be installed.
+
+Verify:
+
+```bash
+curl -sSI https://sectrexconsulting.com/ | grep -i '^server:'   # expect no output
+```
+
+Measured on Ubuntu 24.04 / nginx 1.24:
+
+| Configuration | `Server:` |
+|---|---|
+| stock | `nginx/1.24.0 (Ubuntu)` |
+| `server_tokens off` | `nginx` |
+| `+ more_clear_headers` | *(absent, including on error pages)* |
 
 ## Security configuration
 

@@ -25,10 +25,25 @@ DEST="${DEST:-/etc/nginx/conf.d/00-security.conf}"
 # vhost references them.
 #   ./deploy/install-nginx-config.sh --with-ratelimit /etc/nginx/sites-enabled/example.com
 VHOST=""
-if [[ "${1:-}" == "--with-ratelimit" ]]; then
-  VHOST="${2:?usage: --with-ratelimit /etc/nginx/sites-enabled/<vhost>}"
-  [[ -f "$VHOST" ]] || { echo "vhost not found: $VHOST" >&2; exit 1; }
-fi
+HIDE_SERVER=0
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --with-ratelimit)
+      VHOST="${2:?usage: --with-ratelimit /etc/nginx/sites-enabled/<vhost>}"
+      [[ -f "$VHOST" ]] || { echo "vhost not found: $VHOST" >&2; exit 1; }
+      shift 2 ;;
+    --hide-server)
+      # Removes the Server header outright rather than just its version.
+      HIDE_SERVER=1
+      shift ;;
+    *)
+      echo "unknown option: $1" >&2
+      echo "usage: $0 [--with-ratelimit <vhost>] [--hide-server]" >&2
+      exit 1 ;;
+  esac
+done
+HIDE_SRC="${HERE}/nginx-hide-server.conf"
+HIDE_DEST="/etc/nginx/conf.d/01-hide-server.conf"
 
 log() { printf '\033[36m[nginx-config]\033[0m %s\n' "$*" >&2; }
 
@@ -50,6 +65,25 @@ fi
 install -m 0644 -o root -g root "$SRC" "$DEST"
 log "installed ${DEST}"
 
+# Remove the Server header outright, if asked. `more_clear_headers` comes from
+# a module that is not installed by default, and referencing it without the
+# module stops nginx from starting -- so install the module first and only add
+# the snippet once it is actually present.
+if [[ "$HIDE_SERVER" == "1" ]]; then
+  if ! ls /etc/nginx/modules-enabled/*headers-more* >/dev/null 2>&1; then
+    log "installing libnginx-mod-http-headers-more-filter…"
+    if ! DEBIAN_FRONTEND=noninteractive apt-get install -y -qq \
+         libnginx-mod-http-headers-more-filter >/dev/null 2>&1; then
+      log "could not install the headers-more module; leaving the Server header as 'nginx'"
+      HIDE_SERVER=0
+    fi
+  fi
+  if [[ "$HIDE_SERVER" == "1" ]]; then
+    install -m 0644 -o root -g root "$HIDE_SRC" "$HIDE_DEST"
+    log "installed ${HIDE_DEST}"
+  fi
+fi
+
 # Patch the vhost too, if asked. Backed up separately so rollback restores both.
 if [[ -n "$VHOST" ]]; then
   VHOST_BACKUP="${VHOST}.$(date +%Y%m%d%H%M%S).bak"
@@ -64,6 +98,7 @@ if ! nginx -t 2>&1 | sed 's/^/  /'; then
     cp -a "$VHOST_BACKUP" "$VHOST"
     log "restored ${VHOST}"
   fi
+  [[ "$HIDE_SERVER" == "1" ]] && rm -f "$HIDE_DEST"
   if [[ -n "${BACKUP:-}" && -f "${BACKUP}" ]]; then
     cp -a "$BACKUP" "$DEST"
   else
@@ -81,7 +116,7 @@ log "nginx reloaded"
 # them a moment or this reports the pre-reload value.
 sleep 2
 BANNER="$(curl -sSI --max-time 5 http://127.0.0.1/ 2>/dev/null | grep -i '^server:' || true)"
-log "server header now: ${BANNER:-<no response on 127.0.0.1:80; check from outside>}"
+log "server header now: ${BANNER:-<none — Server header removed>}"
 if [[ -n "$VHOST" ]]; then
   log "done. Rate limiting is active on /contact/ (5r/m) and /admin/ (20r/m)."
 else
