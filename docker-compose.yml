@@ -81,10 +81,16 @@ services:
     volumes:
       - media:/app/media
     ports:
-      # Loopback only. Docker writes its own iptables rules ahead of ufw, so a
-      # bare "8001:8000" publishes the app to the internet regardless of the
-      # host firewall, bypassing nginx, TLS and the rate limits.
-      - "127.0.0.1:8001:8000"   # host 8001 → container 8000
+      # Bind address is explicit, never "8001:8000": a bare mapping listens on
+      # every interface, and Docker writes its own iptables rules ahead of ufw,
+      # so the app ends up reachable outside nginx regardless of the firewall.
+      #
+      #   APP_BIND_IP=127.0.0.1      nginx on the same host (default)
+      #   APP_BIND_IP=10.x.x.x       nginx on an LXC/VM host, app in a guest --
+      #                              use the guest's private bridge address, so
+      #                              the proxy can reach it and the internet
+      #                              cannot.
+      - "${APP_BIND_IP:-127.0.0.1}:8001:8000"
     healthcheck:
       # Sends the first configured ALLOWED_HOSTS entry as the Host header:
       # requesting "localhost" trips Django's host validation (400) on any
