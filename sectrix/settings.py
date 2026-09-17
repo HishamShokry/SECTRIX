@@ -113,10 +113,13 @@ if env("DJANGO_DB_ENGINE", "sqlite") == "postgres":
         }
     }
 else:
+    # Path is configurable because the container keeps /app read-only to the
+    # runtime user (so an arbitrary-write bug cannot overwrite code); SQLite
+    # needs somewhere it may actually create a file.
     DATABASES = {
         "default": {
             "ENGINE": "django.db.backends.sqlite3",
-            "NAME": BASE_DIR / "db.sqlite3",
+            "NAME": env("DJANGO_SQLITE_PATH", "") or BASE_DIR / "db.sqlite3",
         }
     }
 
@@ -294,6 +297,11 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 # Search-engine indexing. Keep this False while the site is serving demo
 # content so placeholder copy is not indexed or cached by crawlers.
 ALLOW_INDEXING = env_bool("DJANGO_ALLOW_INDEXING", False)
+
+# Deployment safety checks (apps/core/checks.py) report as warnings by
+# default, so a configuration slip is visible without taking the site down.
+# Set True to promote them to errors, which blocks startup instead.
+STRICT_DEPLOY_CHECKS = env_bool("DJANGO_STRICT_DEPLOY_CHECKS", False)
 
 SITE_META = {
     "name": "Sectrex Consulting",

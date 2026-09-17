@@ -84,8 +84,13 @@ and runs collectstatic before handing off to Gunicorn.
 ## Security configuration
 
 `apps/core/checks.py` runs on every `manage.py` invocation (including the
-container entrypoint's `safe_migrate`) and **refuses to start** a production
-deployment that would leak data or sign with a placeholder key:
+container entrypoint's `safe_migrate`) and reports configurations that would
+leak data or sign with a placeholder key.
+
+By default these are **warnings** — printed on every start, but the site still
+comes up, so a configuration slip does not become an outage. Set
+`DJANGO_STRICT_DEPLOY_CHECKS=True` to promote them to errors that block the
+boot; worth doing once the deployment has settled.
 
 | Check | Fails when |
 |---|---|

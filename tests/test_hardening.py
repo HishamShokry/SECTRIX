@@ -131,7 +131,7 @@ class JSONFieldValidationTests(TestCase):
 class DeploymentCheckTests(TestCase):
     """H5: a production boot must refuse to log inquiry PII."""
 
-    def test_console_email_backend_is_an_error_in_production(self):
+    def test_console_email_backend_is_reported_in_production(self):
         from apps.core.checks import check_production_configuration
         with override_settings(
             DEBUG=False,
@@ -140,11 +140,42 @@ class DeploymentCheckTests(TestCase):
             ids = [m.id for m in check_production_configuration(None)]
         self.assertIn("sectrex.E001", ids)
 
-    def test_placeholder_secret_key_is_an_error_in_production(self):
+    def test_placeholder_secret_key_is_reported_in_production(self):
         from apps.core.checks import check_production_configuration
         with override_settings(DEBUG=False, SECRET_KEY="django-insecure-change-me"):
             ids = [m.id for m in check_production_configuration(None)]
         self.assertIn("sectrex.E002", ids)
+
+    def test_findings_only_warn_by_default(self):
+        """A configuration slip must not take the site down."""
+        from django.core.checks import WARNING
+        from apps.core.checks import check_production_configuration
+
+        with override_settings(
+            DEBUG=False,
+            STRICT_DEPLOY_CHECKS=False,
+            SECRET_KEY="django-insecure-change-me",
+            EMAIL_BACKEND="django.core.mail.backends.console.EmailBackend",
+        ):
+            messages = check_production_configuration(None)
+        self.assertTrue(messages)
+        for message in messages:
+            with self.subTest(id=message.id):
+                self.assertEqual(message.level, WARNING)
+                self.assertFalse(message.is_serious())
+
+    def test_strict_mode_promotes_them_to_errors(self):
+        from django.core.checks import ERROR
+        from apps.core.checks import check_production_configuration
+
+        with override_settings(
+            DEBUG=False,
+            STRICT_DEPLOY_CHECKS=True,
+            SECRET_KEY="django-insecure-change-me",
+            EMAIL_BACKEND="django.core.mail.backends.console.EmailBackend",
+        ):
+            serious = [m for m in check_production_configuration(None) if m.level >= ERROR]
+        self.assertEqual({m.id for m in serious}, {"sectrex.E001", "sectrex.E002"})
 
     def test_checks_stay_quiet_in_development(self):
         from apps.core.checks import check_production_configuration

@@ -1,13 +1,25 @@
 """Deployment safety checks.
 
 Run automatically by `manage.py check` (and therefore by `migrate`,
-`runserver` and the container entrypoint), so a misconfigured production boot
-fails visibly instead of serving in a degraded state.
+`runserver` and the container entrypoint), so a misconfigured production
+deployment is visible rather than silently degraded.
+
+By default these are **warnings**: they are printed but do not stop the site
+coming up, because a configuration slip should not become an outage. Set
+DJANGO_STRICT_DEPLOY_CHECKS=True to promote them to errors, which refuses the
+boot — worth doing once the deployment is settled.
+
+The message ids are stable regardless of level; only the severity changes.
 """
 from django.conf import settings
 from django.core.checks import Error, Warning, register
 
 INSECURE_KEY_MARKERS = ("django-insecure-", "change-me", "dev-change-me")
+
+
+def _level():
+    """Error when strict mode is on, warning otherwise."""
+    return Error if getattr(settings, "STRICT_DEPLOY_CHECKS", False) else Warning
 
 
 @register()
@@ -22,7 +34,7 @@ def check_production_configuration(app_configs, **kwargs):
     backend = getattr(settings, "EMAIL_BACKEND", "")
     if "console" in backend or "dummy" in backend:
         problems.append(
-            Error(
+            _level()(
                 "Email backend would write contact-form PII to the container log.",
                 hint=(
                     "The console backend prints the full message -- name, work "
@@ -31,13 +43,13 @@ def check_production_configuration(app_configs, **kwargs):
                     "controls. Set DJANGO_EMAIL_BACKEND to "
                     "django.core.mail.backends.smtp.EmailBackend."
                 ),
-                id="sectrex.E001",
+                id="sectrex.E001",   # id is stable; severity follows STRICT_DEPLOY_CHECKS
             )
         )
 
     if any(marker in settings.SECRET_KEY for marker in INSECURE_KEY_MARKERS):
         problems.append(
-            Error(
+            _level()(
                 "SECRET_KEY is one of the placeholder values committed to the repository.",
                 hint=(
                     "Generate one with: "

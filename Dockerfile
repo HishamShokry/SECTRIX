@@ -30,7 +30,10 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
     PIP_NO_CACHE_DIR=1 \
     PIP_DISABLE_PIP_VERSION_CHECK=1 \
-    DJANGO_SETTINGS_MODULE=sectrix.settings
+    DJANGO_SETTINGS_MODULE=sectrix.settings \
+    # /app is read-only to the runtime user; SQLite (dev/standalone use
+    # only -- production sets DJANGO_DB_ENGINE=postgres) needs a writable path.
+    DJANGO_SQLITE_PATH=/app/data/db.sqlite3
 
 # psycopg (binary) + Pillow need a few system libs; curl is for the healthcheck.
 RUN apt-get update \
@@ -60,8 +63,8 @@ COPY --from=css /build/static/js /app/static/js
 # source tree root-owned means an arbitrary-file-write bug cannot overwrite a
 # .py file and become persistent code execution on the next worker respawn.
 RUN useradd --create-home --shell /usr/sbin/nologin --uid 1000 sectrix \
- && mkdir -p /app/staticfiles /app/media \
- && chown -R sectrix:sectrix /app/staticfiles /app/media
+ && mkdir -p /app/staticfiles /app/media /app/data \
+ && chown -R sectrix:sectrix /app/staticfiles /app/media /app/data
 
 USER sectrix
 
