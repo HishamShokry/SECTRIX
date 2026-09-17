@@ -4,7 +4,15 @@ from django.views.generic import TemplateView
 from apps.case_studies.models import CaseStudy
 from apps.services.models import Service
 
-from . import content
+from .models import (
+    CompanyValue,
+    ExpertisePillar,
+    HomeFeature,
+    HomeStat,
+    LeadershipMember,
+    TimelineEntry,
+    TrustedByLogo,
+)
 
 
 class HomeView(TemplateView):
@@ -12,15 +20,15 @@ class HomeView(TemplateView):
 
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
-        ctx["services"] = Service.objects.filter(is_published=True)[:6]
+        services = Service.objects.filter(is_published=True)[:6]
+        ctx["services"] = services
         ctx["case_studies"] = CaseStudy.objects.filter(is_published=True)[:3]
 
-        # Marketing content for hero/sections — kept in core.content so the
-        # template stays presentational and copy is editable in one place.
-        ctx["trusted_by"] = content.TRUSTED_BY
-        ctx["default_services"] = content.SERVICE_TEASERS
-        ctx["stats"] = content.HOME_STATS
-        ctx["features"] = content.HOME_FEATURES
+        # All section copy is admin-editable; see apps.core.models.
+        ctx["trusted_by"] = TrustedByLogo.objects.live()
+        ctx["default_services"] = services
+        ctx["stats"] = HomeStat.objects.live()
+        ctx["features"] = HomeFeature.objects.live()
 
         ctx["meta_title"] = "Sectrex · Enterprise Cybersecurity"
         ctx["meta_description"] = (
@@ -36,10 +44,10 @@ class AboutView(TemplateView):
 
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
-        ctx["values"] = content.COMPANY_VALUES
-        ctx["expertise"] = content.EXPERTISE_PILLARS
-        ctx["leadership"] = content.LEADERSHIP
-        ctx["timeline"] = content.TIMELINE
+        ctx["values"] = CompanyValue.objects.live()
+        ctx["expertise"] = ExpertisePillar.objects.live()
+        ctx["leadership"] = LeadershipMember.objects.live()
+        ctx["timeline"] = TimelineEntry.objects.live()
 
         ctx["meta_title"] = "About · Sectrex"
         ctx["meta_description"] = (

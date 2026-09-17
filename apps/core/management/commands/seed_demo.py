@@ -1,7 +1,10 @@
 """Populate the database with realistic demo content.
 
 Run:  python manage.py seed_demo
-Re-runnable: existing rows with matching slugs are updated in place.
+
+Re-runnable and non-destructive: rows are created only when their slug is
+absent. Site content is editable from the admin and this command runs on every
+container start, so it must never overwrite what an editor has changed.
 """
 from datetime import date
 
@@ -12,7 +15,8 @@ from apps.case_studies.models import CaseStudy
 from apps.careers.models import JobOpening
 from apps.services.models import Service
 
-from apps.core.content import SERVICE_DETAIL
+from apps.core.content import SERVICE_DETAIL, SERVICE_TEASERS
+from apps.core.icons import ICONS
 
 
 CASE_STUDIES = [
@@ -248,16 +252,30 @@ class Command(BaseCommand):
         self._seed_jobs()
         self.stdout.write(self.style.SUCCESS("Demo content seeded."))
 
+    @staticmethod
+    def _icon_key_for(svg):
+        """Reverse-map an inline SVG back to its icon registry key."""
+        for key, markup in ICONS.items():
+            if markup == svg:
+                return key
+        return "shield"
+
     def _seed_services(self):
+        teasers = {t["anchor"]: t for t in SERVICE_TEASERS}
         for order, s in enumerate(SERVICE_DETAIL, start=1):
-            Service.objects.update_or_create(
+            teaser = teasers.get(s["anchor"], {})
+            Service.objects.get_or_create(
                 slug=s["anchor"],
                 defaults={
                     "title":             s["title"],
-                    "short_description": s["intro"][:240],
+                    "short_description": teaser.get("summary", s["intro"])[:240],
                     "description":       s["intro"],
-                    "icon_key":          s["anchor"],
+                    "icon_key":          self._icon_key_for(s.get("icon", "")),
                     "capabilities":      s["capabilities"],
+                    "anchor":            s["anchor"],
+                    "tag":               s.get("tag", ""),
+                    "intro":             s["intro"],
+                    "outcome":           s.get("outcome", "")[:240],
                     "display_order":     order,
                     "is_published":      True,
                 },
@@ -267,15 +285,12 @@ class Command(BaseCommand):
     def _seed_case_studies(self):
         for cs in CASE_STUDIES:
             slug = slugify(f"{cs['client_name']}-{cs['title']}")[:180]
-            CaseStudy.objects.update_or_create(slug=slug, defaults=cs)
+            CaseStudy.objects.get_or_create(slug=slug, defaults=cs)
         self.stdout.write(f"  · Case Studies: {CaseStudy.objects.count()}")
 
     def _seed_jobs(self):
         for j in JOBS:
             slug = slugify(j["title"])
-            # Set apply_email explicitly rather than leaning on the model
-            # default, so rows seeded before a contact-address change are
-            # corrected on the next run instead of keeping the stale value.
             defaults = {**j, "apply_email": JobOpening._meta.get_field("apply_email").default}
-            JobOpening.objects.update_or_create(slug=slug, defaults=defaults)
+            JobOpening.objects.get_or_create(slug=slug, defaults=defaults)
         self.stdout.write(f"  · Job Openings: {JobOpening.objects.count()}")

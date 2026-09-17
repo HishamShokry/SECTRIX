@@ -1,6 +1,8 @@
 from django.db import models
 from django.utils.text import slugify
 
+from apps.core.icons import ICON_CHOICES, render_icon
+
 
 class Service(models.Model):
     title = models.CharField(max_length=120)
@@ -12,8 +14,25 @@ class Service(models.Model):
     description = models.TextField(help_text="Long-form description for the services page.")
     icon_key = models.CharField(
         max_length=40,
+        choices=ICON_CHOICES,
         default="shield",
-        help_text="Icon identifier — matched in templates/partials/icons.html.",
+        help_text="Pick from the built-in icon set.",
+    )
+    anchor = models.SlugField(
+        max_length=80,
+        blank=True,
+        help_text="In-page anchor used by the services page and home links.",
+    )
+    tag = models.CharField(
+        max_length=60,
+        blank=True,
+        help_text="Small mono label above the title, e.g. \"01\".",
+    )
+    intro = models.TextField(
+        blank=True, help_text="Opening paragraph on the services page."
+    )
+    outcome = models.CharField(
+        max_length=240, blank=True, help_text="Single-line outcome statement."
     )
     capabilities = models.JSONField(
         default=list,
@@ -34,4 +53,16 @@ class Service(models.Model):
     def save(self, *args, **kwargs):
         if not self.slug:
             self.slug = slugify(self.title)
+        if not self.anchor:
+            self.anchor = self.slug
         super().save(*args, **kwargs)
+
+    @property
+    def icon(self) -> str:
+        """Inline SVG, so templates keep using ``{{ s.icon|safe }}``."""
+        return render_icon(self.icon_key)
+
+    @property
+    def summary(self) -> str:
+        """Alias kept so the home-page teaser template is unchanged."""
+        return self.short_description

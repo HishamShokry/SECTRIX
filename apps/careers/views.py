@@ -1,6 +1,6 @@
 from django.views.generic import ListView
 
-from apps.core import content
+from apps.core.models import CulturePillar
 
 from .models import JobOpening
 
@@ -22,5 +22,5 @@ class CareersView(ListView):
             "intelligence, cloud security, and offensive security."
         )
         ctx["departments"] = JobOpening.DEPARTMENT_CHOICES
-        ctx["culture_pillars"] = content.CULTURE_PILLARS
+        ctx["culture_pillars"] = CulturePillar.objects.live()
         return ctx
