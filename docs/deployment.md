@@ -43,6 +43,16 @@ cd /opt/sectrix
 DOMAIN=sectrexconsulting.com EMAIL=ops@sectrexconsulting.com ./deploy/bootstrap.sh
 ```
 
+If Docker came from Ubuntu's `docker.io` package rather than Docker's own
+repository, the Compose **v2 plugin** is missing and `docker compose` fails with
+`unknown command`. The standalone `docker-compose` v1 cannot parse this file
+(it uses `depends_on` health conditions and a top-level `volumes:` section):
+
+```bash
+sudo apt-get install -y docker-compose-v2
+docker compose version
+```
+
 `deploy/bootstrap.sh` is idempotent and does: fresh-host preflight, a swapfile
 only on small hosts (skipped at >= 4 GB RAM), Docker engine + compose plugin,
 ufw (SSH + nginx only), container log rotation capped at 30 MB, the nginx site

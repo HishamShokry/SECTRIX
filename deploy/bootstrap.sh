@@ -108,7 +108,20 @@ https://download.docker.com/linux/ubuntu $(. /etc/os-release && echo "$VERSION_C
   apt-get install -y -qq docker-ce docker-ce-cli containerd.io docker-compose-plugin
   systemctl enable --now docker
 else
-  log "docker already installed, skipping"
+  log "docker already installed, skipping engine install"
+fi
+
+# Compose v2 is a separate plugin, and Ubuntu's docker.io package does not
+# ship it — so check for it independently of the engine. The retired
+# standalone docker-compose v1 cannot parse this project's compose file.
+if ! docker compose version >/dev/null 2>&1; then
+  log "installing compose v2 plugin…"
+  apt-get install -y -qq docker-compose-plugin \
+    || apt-get install -y -qq docker-compose-v2
+  docker compose version >/dev/null 2>&1 \
+    || { log "compose v2 still unavailable — install it manually"; exit 1; }
+else
+  log "compose v2 present, skipping"
 fi
 
 # ---- 4. Firewall ---------------------------------------------------------
