@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Sectrix container entrypoint.
+# Sectrex container entrypoint.
 # - waits for Postgres
 # - applies migrations
 # - seeds demo content (idempotent, controlled by env)

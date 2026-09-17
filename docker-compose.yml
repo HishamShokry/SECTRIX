@@ -1,4 +1,4 @@
-# Sectrix — local container stack.
+# Sectrex — local container stack.
 #   web : Django + Gunicorn behind WhiteNoise (static files)
 #   db  : PostgreSQL 16 with a healthcheck and named volume
 
@@ -45,12 +45,28 @@ services:
       POSTGRES_HOST:            db
       POSTGRES_PORT:            5432
 
-      DJANGO_EMAIL_BACKEND:     django.core.mail.backends.console.EmailBackend
-      DEFAULT_FROM_EMAIL:       noreply@sectrix.com
-      CONTACT_INBOX:            contact@sectrix.com
+      DJANGO_EMAIL_BACKEND:     ${DJANGO_EMAIL_BACKEND:-django.core.mail.backends.console.EmailBackend}
+      EMAIL_HOST:               ${EMAIL_HOST:-}
+      EMAIL_PORT:               ${EMAIL_PORT:-587}
+      EMAIL_HOST_USER:          ${EMAIL_HOST_USER:-}
+      EMAIL_HOST_PASSWORD:      ${EMAIL_HOST_PASSWORD:-}
+      EMAIL_USE_TLS:            ${EMAIL_USE_TLS:-True}
+      DEFAULT_FROM_EMAIL:       ${DEFAULT_FROM_EMAIL:-noreply@sectrexconsulting.com}
+      CONTACT_INBOX:            ${CONTACT_INBOX:-contact@sectrexconsulting.com}
 
       SECTRIX_SEED_DEMO:        ${SECTRIX_SEED_DEMO:-true}
       SITE_URL:                 ${SITE_URL:-http://localhost:8001}
+    # Overrides the Dockerfile CMD (ENTRYPOINT still runs migrate/seed/static).
+    # Sized for the host: roughly (2 x cores) + 1, but past ~8 workers this
+    # site gains nothing and just holds RAM.
+    command:
+      - gunicorn
+      - sectrix.wsgi:application
+      - --bind=0.0.0.0:8000
+      - --workers=${GUNICORN_WORKERS:-3}
+      - --threads=${GUNICORN_THREADS:-2}
+      - --access-logfile=-
+      - --error-logfile=-
     volumes:
       - media:/app/media
     ports:

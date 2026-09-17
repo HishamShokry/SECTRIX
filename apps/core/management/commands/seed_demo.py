@@ -23,7 +23,7 @@ CASE_STUDIES = [
         "region": "UAE",
         "summary": "Re-engineered the detection pipeline and SOC playbooks across the bank's hybrid estate, taking mean time to detect from 64 minutes to under 18.",
         "challenge": "The bank's existing SIEM produced over 2,400 alerts per analyst per day with no scoring model. Critical signals were buried; analyst burnout was rising; the regulator had flagged inconsistent triage discipline.",
-        "approach": "Rebuilt the detection use-case library against MITRE ATT&CK, introduced a confidence-and-business-impact scoring model, and migrated tier-1 triage to a single console. Embedded two Sectrix principals into the SOC for the first 60 days.",
+        "approach": "Rebuilt the detection use-case library against MITRE ATT&CK, introduced a confidence-and-business-impact scoring model, and migrated tier-1 triage to a single console. Embedded two Sectrex principals into the SOC for the first 60 days.",
         "outcome": "Alert volume per analyst fell by 81%. Mean time to detect dropped from 64 minutes to 17 on high-confidence alerts. The regulator's follow-up examination closed with zero findings against detection capability.",
         "headline_metric": "−72%",
         "headline_metric_label": "Mean time to detect",
@@ -53,7 +53,7 @@ CASE_STUDIES = [
         "region": "GCC",
         "summary": "Mobilized within four hours, contained lateral movement within twelve, and restored production operations within six business days.",
         "challenge": "A destructive payload entered the corporate estate via a compromised contractor laptop and began encrypting endpoints across multiple sites. The OT network was at risk; production downtime was measured in millions of dollars per day.",
-        "approach": "Sectrix Incident Response mobilized on retainer within four hours. Isolated affected segments, validated OT integrity, ran parallel forensic and recovery tracks, and rebuilt identity-trust posture before reconnecting workloads.",
+        "approach": "Sectrex Incident Response mobilized on retainer within four hours. Isolated affected segments, validated OT integrity, ran parallel forensic and recovery tracks, and rebuilt identity-trust posture before reconnecting workloads.",
         "outcome": "OT network never breached. Corporate environment restored in six business days. Root cause traced to a single contractor credential. Lessons-learned report accepted by the regulator on first review.",
         "headline_metric": "6 days",
         "headline_metric_label": "Operations restored",
@@ -138,7 +138,7 @@ JOBS = [
         "level": "principal",
         "location": "Dubai, UAE",
         "is_remote_friendly": True,
-        "summary": "Define and ship Sectrix's cloud security reference architectures across AWS, Azure, and OCI.",
+        "summary": "Define and ship Sectrex's cloud security reference architectures across AWS, Azure, and OCI.",
         "description": "You'll set the technical direction for our cloud practice — landing zones, detection pipelines, workload protection — and ship those designs into client environments alongside our engagement teams.",
         "requirements": [
             "8+ years in cloud engineering with a security specialization",
@@ -273,5 +273,9 @@ class Command(BaseCommand):
     def _seed_jobs(self):
         for j in JOBS:
             slug = slugify(j["title"])
-            JobOpening.objects.update_or_create(slug=slug, defaults=j)
+            # Set apply_email explicitly rather than leaning on the model
+            # default, so rows seeded before a contact-address change are
+            # corrected on the next run instead of keeping the stale value.
+            defaults = {**j, "apply_email": JobOpening._meta.get_field("apply_email").default}
+            JobOpening.objects.update_or_create(slug=slug, defaults=defaults)
         self.stdout.write(f"  · Job Openings: {JobOpening.objects.count()}")

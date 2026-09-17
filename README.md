@@ -1,6 +1,6 @@
-# Sectrix — Corporate Portfolio Website
+# Sectrex — Corporate Portfolio Website
 
-A premium, dark-themed Django 5 corporate site for Sectrix, an enterprise cybersecurity company targeting Gulf banks, governments, and large organizations.
+A premium, dark-themed Django 5 corporate site for Sectrex, an enterprise cybersecurity company targeting Gulf banks, governments, and large organizations.
 
 ## Stack
 

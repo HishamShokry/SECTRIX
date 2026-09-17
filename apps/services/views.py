@@ -17,7 +17,7 @@ class ServiceListView(TemplateView):
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
         ctx["services"] = content.SERVICE_DETAIL
-        ctx["meta_title"] = "Services · Sectrix"
+        ctx["meta_title"] = "Services · Sectrex"
         ctx["meta_description"] = (
             "Enterprise cybersecurity services — threat detection, cloud "
             "security, infrastructure protection, incident response, zero "

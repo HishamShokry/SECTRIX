@@ -14,10 +14,10 @@ class CaseStudyListView(ListView):
 
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
-        ctx["meta_title"] = "Case Studies · Sectrix"
+        ctx["meta_title"] = "Case Studies · Sectrex"
         ctx["meta_description"] = (
             "Selected engagements with Gulf banks, sovereign agencies, and "
-            "regional enterprises — measurable outcomes from Sectrix "
+            "regional enterprises — measurable outcomes from Sectrex "
             "cybersecurity programs."
         )
         ctx["sectors"] = CaseStudy.SECTOR_CHOICES

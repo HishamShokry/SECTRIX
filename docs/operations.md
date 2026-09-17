@@ -39,7 +39,7 @@ The container reads everything from environment. `.env.example` is the canonical
 | `DJANGO_SECRET_KEY` | dev fallback | **Required in prod.** Min 50 random chars. |
 | `DJANGO_DEBUG` | `True` (local) / `False` (compose) | Controls security middleware behavior. |
 | `DJANGO_ALLOWED_HOSTS` | `localhost,127.0.0.1` | Comma-separated. Add your prod hostname. |
-| `DJANGO_CSRF_TRUSTED_ORIGINS` | (empty) | Comma-separated full URLs (`https://sectrix.com`). Required when behind a reverse proxy. |
+| `DJANGO_CSRF_TRUSTED_ORIGINS` | (empty) | Comma-separated full URLs (`https://sectrexconsulting.com`). Required when behind a reverse proxy. |
 | `DJANGO_TIME_ZONE` | `Asia/Dubai` | Default reflects HQ TZ; data stored as UTC regardless. |
 
 ### Database
@@ -56,14 +56,14 @@ The container reads everything from environment. `.env.example` is the canonical
 |---|---|---|
 | `DJANGO_EMAIL_BACKEND` | `console` | Logs to stdout in dev. Use `django.core.mail.backends.smtp.EmailBackend` in prod. |
 | `EMAIL_HOST` / `EMAIL_PORT` / `EMAIL_HOST_USER` / `EMAIL_HOST_PASSWORD` / `EMAIL_USE_TLS` | empty / 587 / empty / empty / `True` | Standard SMTP config. |
-| `DEFAULT_FROM_EMAIL` | `noreply@sectrix.com` | Envelope sender. |
-| `CONTACT_INBOX` | `contact@sectrix.com` | Where new inquiries are notified. |
+| `DEFAULT_FROM_EMAIL` | `noreply@sectrexconsulting.com` | Envelope sender. |
+| `CONTACT_INBOX` | `contact@sectrexconsulting.com` | Where new inquiries are notified. |
 
 ### Site
 
 | Var | Default | Notes |
 |---|---|---|
-| `SITE_URL` | `https://sectrix.com` | Used in `og:url`, canonical, and sitemap. |
+| `SITE_URL` | `https://sectrexconsulting.com` | Used in `og:url`, canonical, and sitemap. |
 | `SECTRIX_SEED_DEMO` | `true` (compose entrypoint) | Set to `false` to skip seeding on container boot. |
 
 ## Admin panel

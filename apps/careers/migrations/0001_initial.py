@@ -77,7 +77,7 @@ class Migration(migrations.Migration):
                 ("closes_at", models.DateField(blank=True, null=True)),
                 (
                     "apply_email",
-                    models.EmailField(default="careers@sectrix.com", max_length=254),
+                    models.EmailField(default="careers@sectrexconsulting.com", max_length=254),
                 ),
             ],
             options={

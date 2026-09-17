@@ -1,4 +1,4 @@
-"""ASGI config for Sectrix."""
+"""ASGI config for Sectrex."""
 import os
 from django.core.asgi import get_asgi_application
 

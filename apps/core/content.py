@@ -150,7 +150,7 @@ LEADERSHIP = [
     {
         "name":  "Hala Al-Faraj",
         "role":  "Chief Executive Officer",
-        "bio":   "Two decades across sovereign cyber programs and Big-Four advisory. Founded Sectrix to bring engineering rigor to enterprise defense in the GCC.",
+        "bio":   "Two decades across sovereign cyber programs and Big-Four advisory. Founded Sectrex to bring engineering rigor to enterprise defense in the GCC.",
         "initials": "HF",
     },
     {
@@ -175,12 +175,12 @@ LEADERSHIP = [
 
 
 TIMELINE = [
-    {"year": "2019", "title": "Founded in Dubai", "body": "Sectrix is established with a charter to engineer defense for Gulf enterprises."},
+    {"year": "2019", "title": "Founded in Dubai", "body": "Sectrex is established with a charter to engineer defense for Gulf enterprises."},
     {"year": "2020", "title": "First Tier-1 bank engagement", "body": "Designed and deployed continuous detection across a regional bank's hybrid estate."},
     {"year": "2021", "title": "Regional SOC operational", "body": "24/7 security operations center commissioned with multi-country analyst coverage."},
     {"year": "2022", "title": "Sovereign-cloud reference architecture", "body": "Published reference designs for regulated workloads on sovereign cloud platforms."},
     {"year": "2023", "title": "Riyadh & Doha offices", "body": "Expanded operations across KSA and Qatar with local incident-response capability."},
-    {"year": "2024", "title": "140+ active engagements", "body": "Sectrix now defends institutions across banking, government, energy, and telecom."},
+    {"year": "2024", "title": "140+ active engagements", "body": "Sectrex now defends institutions across banking, government, energy, and telecom."},
     {"year": "2026", "title": "Threat intelligence practice", "body": "Dedicated regional threat intelligence team formalized as a standalone practice area."},
 ]
 

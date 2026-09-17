@@ -55,6 +55,6 @@ class ContactInquiryForm(forms.ModelForm):
         if domain in free_domains:
             raise forms.ValidationError(
                 "Please use a work email address. For general inquiries, "
-                "reach us at contact@sectrix.com."
+                "reach us at contact@sectrexconsulting.com."
             )
         return email

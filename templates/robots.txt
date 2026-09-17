@@ -1,4 +1,8 @@
-User-agent: *
+{% if allow_indexing %}User-agent: *
 Allow: /
 Disallow: /admin/
 Sitemap: {{ request.scheme }}://{{ request.get_host }}/sitemap.xml
+{% else %}# Indexing disabled: set DJANGO_ALLOW_INDEXING=True once real content is live.
+User-agent: *
+Disallow: /
+{% endif %}

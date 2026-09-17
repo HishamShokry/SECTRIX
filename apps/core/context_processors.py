@@ -4,6 +4,7 @@ from django.conf import settings
 def site_meta(request):
     return {
         "site": getattr(settings, "SITE_META", {}),
+        "allow_indexing": getattr(settings, "ALLOW_INDEXING", False),
         "nav_items": [
             {"label": "Home", "url_name": "core:home"},
             {"label": "About", "url_name": "core:about"},

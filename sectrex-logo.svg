@@ -1,6 +1,6 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 360" width="1200" height="360" role="img" aria-label="Sectrix">
-  <title>Sectrix</title>
-  <desc>Sectrix combination mark. Four converging geometric blades form a precision X around a central electric-blue node, paired with a clean sans-serif wordmark.</desc>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 360" width="1200" height="360" role="img" aria-label="Sectrex">
+  <title>Sectrex</title>
+  <desc>Sectrex combination mark. Four converging geometric blades form a precision X around a central electric-blue node, paired with a clean sans-serif wordmark.</desc>
 
   <!-- White background -->
   <rect width="1200" height="360" fill="#FFFFFF"/>
@@ -33,7 +33,7 @@
   <text x="416" y="218"
         font-family="'Helvetica Neue', 'Inter', 'Arial', sans-serif"
         font-size="118" font-weight="500"
-        fill="#0E1F3A" letter-spacing="16">SECTRIX</text>
+        fill="#0E1F3A" letter-spacing="16">SECTREX</text>
 
   <!-- Refined descriptor rule + label -->
   <line x1="418" y1="250" x2="500" y2="250" stroke="#00B4F0" stroke-width="3"/>
