@@ -25,6 +25,11 @@ MARKER = "# sectrex: rate limiting"
 
 TUNING = {"contact": ("contact", 3), "admin": ("admin", 5)}
 
+# Static assets are proxied without a limit: one page load fetches the
+# stylesheet, Alpine and two fonts, so counting them against a per-minute
+# budget throttles ordinary visitors.
+UNLIMITED_PREFIXES = ["/static/"]
+
 
 def find_location_root(text):
     """Return (start, end, body) for the `location / { ... }` block."""
@@ -81,6 +86,12 @@ def main():
     #    `location /` (nginx prefers the longest prefix match regardless of
     #    order, but keeping them first reads better).
     new_blocks = [f"{indent}{MARKER} -- zones are declared in /etc/nginx/conf.d/00-security.conf"]
+    for prefix in UNLIMITED_PREFIXES:
+        new_blocks.append(f"{indent}location {prefix} {{")
+        for line in proxy_lines:
+            new_blocks.append(f"{indent}    {line}")
+        new_blocks.append(f"{indent}}}")
+        new_blocks.append("")
     for path_name, (zone, burst) in TUNING.items():
         new_blocks.append(f"{indent}location /{path_name}/ {{")
         new_blocks.append(f"{indent}    limit_req zone={zone} burst={burst} nodelay;")
