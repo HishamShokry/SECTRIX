@@ -33,6 +33,6 @@ if settings.DEBUG:
 handler404 = "apps.core.views.handler404"
 handler500 = "apps.core.views.handler500"
 
-admin.site.site_header = "Sectrex Administration"
-admin.site.site_title = "Sectrex Admin"
-admin.site.index_title = "Operations Console"
+# Admin branding lives in apps/core/admin.py, where it can follow the editable
+# site name. Assigning it here as well would silently win, because urls.py is
+# imported after admin autodiscovery.

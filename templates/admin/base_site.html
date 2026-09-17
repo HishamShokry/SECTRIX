@@ -1,0 +1,29 @@
+{% extends "admin/base.html" %}
+{% load static %}
+
+{% block title %}{{ title }} | {{ site_title|default:_('Site administration') }}{% endblock %}
+
+{% block extrastyle %}
+  {{ block.super }}
+  <link rel="stylesheet" href="{% static 'css/admin-brand.css' %}">
+  <link rel="icon" type="image/svg+xml" href="{% static 'img/favicon.svg' %}">
+{% endblock %}
+
+{% block branding %}
+  <div id="site-name">
+    <a href="{% url 'admin:index' %}">
+      {# Icon mark only — the wordmark is the configurable site name. #}
+      <svg class="sectrex-mark" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" aria-hidden="true">
+        <polygon points="57,37 93,87 87,93 37,57"        fill="currentColor"/>
+        <polygon points="143,37 107,87 113,93 163,57"    fill="currentColor"/>
+        <polygon points="57,163 93,113 87,107 37,143"    fill="currentColor"/>
+        <polygon points="143,163 107,113 113,107 163,143" fill="currentColor"/>
+        <polygon points="100,92 108,100 100,108 92,100"  fill="#00B4F0"/>
+      </svg>
+      <span class="sectrex-wordmark">{{ site_header }}</span>
+    </a>
+  </div>
+  {% if user.is_anonymous %}
+    {% include "admin/color_theme_toggle.html" %}
+  {% endif %}
+{% endblock %}

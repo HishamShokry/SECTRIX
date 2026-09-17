@@ -1,4 +1,5 @@
 from django.contrib import admin
+from django.utils.functional import lazy
 
 from .models import (
     CompanyValue,
@@ -11,6 +12,27 @@ from .models import (
     TimelineEntry,
     TrustedByLogo,
 )
+
+
+def _site_name() -> str:
+    """Admin branding follows the editable site name.
+
+    Falls back to a literal if the table is not migrated yet, so the admin
+    stays reachable on a fresh database.
+    """
+    try:
+        return SiteSettings.load().name
+    except Exception:
+        return "Sectrex Consulting"
+
+
+def _admin_title() -> str:
+    return f"{_site_name()} Admin"
+
+
+admin.site.site_header = lazy(_site_name, str)()
+admin.site.site_title = lazy(_admin_title, str)()
+admin.site.index_title = "Operations Console"
 
 
 class ContentAdmin(admin.ModelAdmin):

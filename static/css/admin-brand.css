@@ -1,0 +1,87 @@
+/* Sectrex Consulting admin theme.
+ *
+ * Django 5's admin exposes its palette as CSS custom properties, so branding
+ * it needs no template forks beyond admin/base_site.html. Only chrome —
+ * header, links, buttons — is restyled; form and table surfaces keep Django's
+ * defaults so readability and future admin updates are unaffected.
+ */
+
+:root {
+  --sectrex-navy-950: #060F22;
+  --sectrex-navy-800: #0E1F3A;
+  --sectrex-navy-700: #142243;
+  --sectrex-accent:   #00B4F0;
+  --sectrex-deep:     #0096C7;
+  --sectrex-graphite: #9AA2B3;
+
+  --primary:        var(--sectrex-navy-800);
+  --secondary:      var(--sectrex-navy-800);
+  --accent:         var(--sectrex-accent);
+  --primary-fg:     #ffffff;
+
+  --header-bg:              var(--sectrex-navy-950);
+  --header-color:           #ffffff;
+  --header-branding-color:  var(--sectrex-accent);
+  --header-link-color:      #ffffff;
+
+  --breadcrumbs-bg:       var(--sectrex-navy-800);
+  --breadcrumbs-fg:       var(--sectrex-graphite);
+  --breadcrumbs-link-fg:  #ffffff;
+
+  --link-fg:            var(--sectrex-deep);
+  --link-hover-color:   var(--sectrex-accent);
+  --link-selected-fg:   var(--sectrex-deep);
+
+  --button-bg:                var(--sectrex-navy-800);
+  --button-hover-bg:          var(--sectrex-navy-700);
+  --default-button-bg:        var(--sectrex-accent);
+  --default-button-hover-bg:  var(--sectrex-deep);
+  --close-button-bg:          #4A5466;
+  --close-button-hover-bg:    #363D4B;
+
+  --object-tools-bg:        var(--sectrex-navy-800);
+  --object-tools-hover-bg:  var(--sectrex-accent);
+
+  --selected-bg:  #E8F6FD;
+  --selected-row: #D6EFFA;
+}
+
+/* Django's own dark theme keeps its surfaces; only the brand hues change. */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --link-fg:          var(--sectrex-accent);
+    --link-hover-color: #34C7F4;
+    --link-selected-fg: var(--sectrex-accent);
+    --selected-bg:      #10293F;
+    --selected-row:     #14344F;
+  }
+}
+
+html[data-theme="dark"] {
+  --link-fg:          var(--sectrex-accent);
+  --link-hover-color: #34C7F4;
+  --link-selected-fg: var(--sectrex-accent);
+  --selected-bg:      #10293F;
+  --selected-row:     #14344F;
+}
+
+/* Branding lockup in the header. */
+#site-name  { display: flex; align-items: center; gap: 0.6rem; }
+#site-name a { display: flex; align-items: center; gap: 0.6rem; }
+#site-name .sectrex-mark { width: 26px; height: 26px; flex: 0 0 auto; }
+#site-name .sectrex-wordmark { letter-spacing: 0.12em; font-weight: 600; }
+
+#header { border-bottom: 1px solid rgba(0, 180, 240, 0.35); }
+
+/* The login card reads as the brand rather than stock Django. */
+.login #header { background: var(--sectrex-navy-950); }
+.login #content { padding-top: 1.25rem; }
+
+/* The login card is ~390px wide, so a long site name wraps mid-lockup.
+   Scale the wordmark down there rather than truncating it. */
+.login #site-name .sectrex-wordmark {
+  font-size: 1.05rem;
+  letter-spacing: 0.06em;
+  line-height: 1.2;
+}
+.login #site-name .sectrex-mark { width: 22px; height: 22px; }
