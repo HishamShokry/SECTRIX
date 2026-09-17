@@ -16,8 +16,19 @@
 # result, so a bad config cannot take the site down.
 set -euo pipefail
 
-SRC="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/nginx-security-headers.conf"
+HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+SRC="${HERE}/nginx-security-headers.conf"
 DEST="${DEST:-/etc/nginx/conf.d/00-security.conf}"
+
+# Optional: also add limit_req directives to a vhost this repo does not own
+# (certbot writes its own). The zones installed above do nothing until a
+# vhost references them.
+#   ./deploy/install-nginx-config.sh --with-ratelimit /etc/nginx/sites-enabled/example.com
+VHOST=""
+if [[ "${1:-}" == "--with-ratelimit" ]]; then
+  VHOST="${2:?usage: --with-ratelimit /etc/nginx/sites-enabled/<vhost>}"
+  [[ -f "$VHOST" ]] || { echo "vhost not found: $VHOST" >&2; exit 1; }
+fi
 
 log() { printf '\033[36m[nginx-config]\033[0m %s\n' "$*" >&2; }
 
@@ -30,7 +41,7 @@ if [[ -f "$DEST" ]]; then
   BACKUP="${DEST}.$(date +%Y%m%d%H%M%S).bak"
   cp -a "$DEST" "$BACKUP"
   log "existing config backed up to ${BACKUP}"
-  if cmp -s "$SRC" "$DEST"; then
+  if cmp -s "$SRC" "$DEST" && [[ -z "$VHOST" ]]; then
     log "already up to date; nothing to do"
     exit 0
   fi
@@ -39,8 +50,20 @@ fi
 install -m 0644 -o root -g root "$SRC" "$DEST"
 log "installed ${DEST}"
 
+# Patch the vhost too, if asked. Backed up separately so rollback restores both.
+if [[ -n "$VHOST" ]]; then
+  VHOST_BACKUP="${VHOST}.$(date +%Y%m%d%H%M%S).bak"
+  cp -a "$VHOST" "$VHOST_BACKUP"
+  log "vhost backed up to ${VHOST_BACKUP}"
+  python3 "${HERE}/add-vhost-ratelimit.py" "$VHOST" | sed 's/^/  /'
+fi
+
 if ! nginx -t 2>&1 | sed 's/^/  /'; then
   log "nginx rejected the configuration — rolling back"
+  if [[ -n "${VHOST_BACKUP:-}" && -f "${VHOST_BACKUP}" ]]; then
+    cp -a "$VHOST_BACKUP" "$VHOST"
+    log "restored ${VHOST}"
+  fi
   if [[ -n "${BACKUP:-}" && -f "${BACKUP}" ]]; then
     cp -a "$BACKUP" "$DEST"
   else
@@ -59,4 +82,8 @@ log "nginx reloaded"
 sleep 2
 BANNER="$(curl -sSI --max-time 5 http://127.0.0.1/ 2>/dev/null | grep -i '^server:' || true)"
 log "server header now: ${BANNER:-<no response on 127.0.0.1:80; check from outside>}"
-log "done. Remember to add limit_req directives to the vhost's location blocks."
+if [[ -n "$VHOST" ]]; then
+  log "done. Rate limiting is active on /contact/ (5r/m) and /admin/ (20r/m)."
+else
+  log "done. Zones are declared but unused — re-run with --with-ratelimit <vhost> to apply them."
+fi

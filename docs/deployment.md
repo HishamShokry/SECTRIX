@@ -106,13 +106,19 @@ It sets `server_tokens off` (the default banner advertises the exact build and
 distribution, e.g. `nginx/1.24.0 (Ubuntu)`, which is a free version-to-CVE
 lookup), adds CSP and `Permissions-Policy`, and declares the rate-limit zones.
 
-The zones still need applying inside the vhost's `location` blocks:
+The zones do nothing until a vhost references them. Pass `--with-ratelimit`
+to apply them to the certbot-managed vhost as well:
 
-```nginx
-location /contact/ { limit_req zone=contact burst=3 nodelay; ... }
-location /admin/   { limit_req zone=admin   burst=5 nodelay; ... }
-location /         { limit_req zone=general burst=40 nodelay; ... }
+```bash
+sudo ./deploy/install-nginx-config.sh --with-ratelimit \
+  /etc/nginx/sites-enabled/sectrexconsulting.com
 ```
+
+That adds `location /contact/` (5r/m) and `location /admin/` (20r/m) blocks and
+a general ceiling on `location /`. It copies the proxy directives out of the
+existing `location /`, so the upstream is whatever the file already uses rather
+than a hardcoded address, and it leaves every certbot-managed line untouched.
+Re-running is a no-op.
 
 Verify: `curl -sSI https://your-domain/ | grep -i server` should read
 `Server: nginx` with no version. To remove the header entirely, install
