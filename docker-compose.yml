@@ -56,6 +56,17 @@ services:
 
       SECTRIX_SEED_DEMO:        ${SECTRIX_SEED_DEMO:-true}
       SITE_URL:                 ${SITE_URL:-http://localhost:8001}
+    # Overrides the Dockerfile CMD (ENTRYPOINT still runs migrate/seed/static).
+    # Sized for the host: roughly (2 x cores) + 1, but past ~8 workers this
+    # site gains nothing and just holds RAM.
+    command:
+      - gunicorn
+      - sectrix.wsgi:application
+      - --bind=0.0.0.0:8000
+      - --workers=${GUNICORN_WORKERS:-3}
+      - --threads=${GUNICORN_THREADS:-2}
+      - --access-logfile=-
+      - --error-logfile=-
     volumes:
       - media:/app/media
     ports:

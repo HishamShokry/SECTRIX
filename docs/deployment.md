@@ -1,41 +1,52 @@
-# Deployment — DigitalOcean droplet
+# Deployment — production host
 
-Target: `s-1vcpu-1gb` (1 vCPU, 1 GB RAM, 25 GB disk), Ubuntu 24.04.
-The full compose stack (Django + Gunicorn + Postgres 16) fits with roughly
-half the RAM free.
+Target: a **fresh, dedicated** Ubuntu 24.04 server running the compose stack
+(Django + Gunicorn + Postgres 16) directly on the host — no LXC, no nesting.
+
+The stack idles at roughly 450–500 MB, so on a well-specced box RAM is not the
+constraint. Size Gunicorn to the host rather than leaving the 1-core default:
 
 | Component | Approx. RSS |
 |---|---|
 | Ubuntu base | ~100 MB |
 | Docker daemon + containerd | ~80 MB |
 | Postgres 16-alpine (low traffic) | ~40–60 MB |
-| Gunicorn, 3 workers × 2 threads | ~210 MB |
+| Gunicorn, per worker | ~70 MB |
 | nginx | ~10 MB |
-| **Total** | **~440–470 MB** |
 
-## 1. Droplet + DNS
+Set `GUNICORN_WORKERS` in `.env` to about `(2 × cores) + 1`. Past ~8 workers
+this site gains nothing — it is a brochure site with a contact form, not a
+compute workload.
 
-Create the droplet, then point DNS at it before running the bootstrap —
-certbot's HTTP-01 challenge needs the name to resolve.
+> **`bootstrap.sh` assumes it owns the host.** It enables a default-deny
+> firewall allowing only SSH/80/443, removes nginx's default site, and restarts
+> the Docker daemon. On a host already running other services those steps are
+> destructive, so the script runs a preflight check and refuses unless
+> `FRESH_HOST_OVERRIDE=1` is set. Run the sections by hand there instead.
+
+## 1. DNS
+
+Point DNS at the server before running the bootstrap — certbot's HTTP-01
+challenge needs the name to resolve.
 
 ```
-A    sectrix.com       -> <droplet-ip>
-A    www.sectrix.com   -> <droplet-ip>
+A    sectrix.com       -> <server-ip>
+A    www.sectrix.com   -> <server-ip>
 ```
 
 ## 2. Bootstrap the host
 
 ```bash
-ssh root@<droplet-ip>
+ssh root@<server-ip>
 git clone <repo-url> /opt/sectrix
 cd /opt/sectrix
 DOMAIN=sectrix.com EMAIL=ops@sectrix.com ./deploy/bootstrap.sh
 ```
 
-`deploy/bootstrap.sh` is idempotent and does: 1 GB swapfile (DO gives none),
-Docker engine + compose plugin, ufw (SSH + nginx only), container log rotation
-capped at 30 MB, the nginx site from `deploy/nginx.conf`, and certbot with
-auto-renewal.
+`deploy/bootstrap.sh` is idempotent and does: fresh-host preflight, a swapfile
+only on small hosts (skipped at >= 4 GB RAM), Docker engine + compose plugin,
+ufw (SSH + nginx only), container log rotation capped at 30 MB, the nginx site
+from `deploy/nginx.conf`, and certbot with auto-renewal.
 
 ## 3. Environment
 
@@ -118,7 +129,11 @@ commit a dump to git.
 - Docker publishes ports via iptables rules that bypass ufw. `docker-compose.yml`
   binds Postgres to `127.0.0.1:5433` so it is loopback-only, but the web
   container's port 8001 is reachable externally. nginx is the intended entry
-  point on 80/443; block 8001 at the DO cloud firewall if you want it closed.
+  point on 80/443; block 8001 at the provider's network firewall to close it,
+  or bind the mapping to `127.0.0.1:8001` in `docker-compose.yml`.
+- Check that outbound port 587 is open before relying on the contact form.
+  Hosting providers commonly restrict SMTP on new accounts, and the form fails
+  silently while `DJANGO_EMAIL_BACKEND` is the console backend.
 - `SECURE_SSL_REDIRECT` is not set in `settings.py`; certbot's `--redirect`
   installs the 301 at the nginx layer instead. `manage.py check --deploy`
   reports W008 for this — expected.
